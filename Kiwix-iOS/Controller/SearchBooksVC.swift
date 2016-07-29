@@ -44,24 +44,24 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     
     // MARK: - Empty table datasource & delegate
     
-    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func title(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("No Book Available", comment: "Book Library, book downloader, no book center title")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
                           NSForegroundColorAttributeName: UIColor.darkGray()]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func buttonTitleForEmptyDataSet(_ scrollView: UIScrollView!, forState state: UIControlState) -> AttributedString! {
+    func buttonTitle(forEmptyDataSet scrollView: UIScrollView!, for state: UIControlState) -> AttributedString! {
         let text = NSLocalizedString("Download A Book", comment: "Book Library, book downloader, learn more button text")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: UIButton().tintColor]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return -64.0
     }
     
-    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 0.0
     }
     

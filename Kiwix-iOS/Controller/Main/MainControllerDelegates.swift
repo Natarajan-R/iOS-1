@@ -9,7 +9,6 @@
 import UIKit
 import SafariServices
 import JavaScriptCore
-import DZNEmptyDataSet
 
 extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, ZimMultiReaderDelegate, UISearchBarDelegate, UIPopoverPresentationControllerDelegate, UIWebViewDelegate, SFSafariViewControllerDelegate, UIScrollViewDelegate, UIViewControllerTransitioningDelegate {
     

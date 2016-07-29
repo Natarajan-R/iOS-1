@@ -37,18 +37,18 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
+    func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "BookmarkColor")
     }
     
-    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func title(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("Bookmarks", comment: "Bookmarks view title")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
                           NSForegroundColorAttributeName: UIColor.darkGray()]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func descriptionForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func description(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("To add a bookmark, long press the star button when reading an article", comment: "Bookmarks view message")
         let style = NSMutableParagraphStyle()
         style.lineBreakMode = .byWordWrapping
@@ -59,7 +59,7 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
 

@@ -63,22 +63,22 @@ class TableOfContentsController: UIViewController, UITableViewDelegate, UITableV
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
+    func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "Compass")
     }
     
-    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func title(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("Table Of Contents Not Available", comment: "Table Of Content, empty text")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
                           NSForegroundColorAttributeName: UIColor.darkGray()]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 0.0
     }
     
-    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
     

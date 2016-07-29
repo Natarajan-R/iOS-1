@@ -104,18 +104,18 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
+    func image(forEmptyDataSet scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "DownloadColor")
     }
     
-    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func title(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("No Download Task", comment: "Book Library, book downloader, no book center title")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
                           NSForegroundColorAttributeName: UIColor.darkGray()]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func descriptionForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
+    func description(forEmptyDataSet scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("After starting a download task, minimize the app to continue the task in the background.", comment: "Book Library, book downloader, no book center description")
         let style = NSMutableParagraphStyle()
         style.lineBreakMode = .byWordWrapping
@@ -126,17 +126,17 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func buttonTitleForEmptyDataSet(_ scrollView: UIScrollView!, forState state: UIControlState) -> AttributedString! {
+    func buttonTitle(forEmptyDataSet scrollView: UIScrollView!, for state: UIControlState) -> AttributedString! {
         let text = NSLocalizedString("Learn more", comment: "Book Library, book downloader, learn more button text")
         let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: segmentedControl.tintColor]
         return AttributedString(string: text, attributes: attributes)
     }
     
-    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 0.0
     }
     
-    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
     

@@ -51,10 +51,6 @@
 		971187921CEB541A00B9909D /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C588E1C1CD86E0077AE47 /* Language.swift */; };
 		971187931CEB541A00B9909D /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998701C1E0B7900B1DD5E /* DownloadTask.swift */; };
 		971187941CEB541A00B9909D /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C58941C1CD86E0077AE47 /* Article.swift */; };
-		971187951CEB542500B9909D /* Book+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986E1C1E0B7900B1DD5E /* Book+CoreDataProperties.swift */; };
-		971187961CEB542500B9909D /* DownloadTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986F1C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift */; };
-		971187971CEB542500B9909D /* Article+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998711C1E0B7900B1DD5E /* Article+CoreDataProperties.swift */; };
-		971187981CEB542500B9909D /* Language+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998721C1E0B7900B1DD5E /* Language+CoreDataProperties.swift */; };
 		9711879A1CEB546C00B9909D /* CoreDataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971187991CEB546C00B9909D /* CoreDataExtension.swift */; };
 		9711879B1CEB546C00B9909D /* CoreDataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971187991CEB546C00B9909D /* CoreDataExtension.swift */; };
 		971187A91CEB694400B9909D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 971187A81CEB694400B9909D /* WebKit.framework */; };
@@ -154,11 +150,15 @@
 		9763A6291CEB9E55008A2718 /* OSXExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9763A6281CEB9E55008A2718 /* OSXExtensions.swift */; };
 		9763A62D1CEBA524008A2718 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E891681CA976E90001CA32 /* FileManager.swift */; };
 		976AB2671CBD8B3D00B06EB0 /* 1.5.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 976AB2661CBD8B3D00B06EB0 /* 1.5.xcmappingmodel */; };
-		977998741C1E0B7900B1DD5E /* Book+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986E1C1E0B7900B1DD5E /* Book+CoreDataProperties.swift */; };
-		977998751C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986F1C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift */; };
+		976AB2D91D4BDBFA005DDE77 /* Book+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986E1C1E0B7900B1DD5E /* Book+CoreDataProperties.swift */; };
+		976AB2DA1D4BDBFA005DDE77 /* DownloadTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986F1C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift */; };
+		976AB2DB1D4BDBFA005DDE77 /* Article+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998711C1E0B7900B1DD5E /* Article+CoreDataProperties.swift */; };
+		976AB2DC1D4BDBFA005DDE77 /* Language+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998721C1E0B7900B1DD5E /* Language+CoreDataProperties.swift */; };
+		976AB2DD1D4BDBFA005DDE77 /* Book+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986E1C1E0B7900B1DD5E /* Book+CoreDataProperties.swift */; };
+		976AB2DE1D4BDBFA005DDE77 /* DownloadTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779986F1C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift */; };
+		976AB2DF1D4BDBFA005DDE77 /* Article+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998711C1E0B7900B1DD5E /* Article+CoreDataProperties.swift */; };
+		976AB2E01D4BDBFA005DDE77 /* Language+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998721C1E0B7900B1DD5E /* Language+CoreDataProperties.swift */; };
 		977998761C1E0B7900B1DD5E /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998701C1E0B7900B1DD5E /* DownloadTask.swift */; };
-		977998771C1E0B7900B1DD5E /* Article+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998711C1E0B7900B1DD5E /* Article+CoreDataProperties.swift */; };
-		977998781C1E0B7900B1DD5E /* Language+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977998721C1E0B7900B1DD5E /* Language+CoreDataProperties.swift */; };
 		9779987B1C1E1C9600B1DD5E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779987A1C1E1C9600B1DD5E /* Extensions.swift */; };
 		9779A1C81D34225E0071EFAB /* AlertOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C21D34225E0071EFAB /* AlertOperation.swift */; };
 		9779A1C91D34225E0071EFAB /* GlobalOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C31D34225E0071EFAB /* GlobalOperationQueue.swift */; };
@@ -1582,26 +1582,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				976AB2DF1D4BDBFA005DDE77 /* Article+CoreDataProperties.swift in Sources */,
 				9752279B1D020C00001D1DDE /* otherTools.cpp in Sources */,
 				975B912F1CEB9B0F00D13906 /* Preference.swift in Sources */,
 				971187941CEB541A00B9909D /* Article.swift in Sources */,
 				9752279D1D020C00001D1DDE /* pathTools.cpp in Sources */,
 				975227A91D020C2E001D1DDE /* myhtmlparse.cc in Sources */,
 				975227B01D021539001D1DDE /* IndexerController.swift in Sources */,
+				976AB2DE1D4BDBFA005DDE77 /* DownloadTask+CoreDataProperties.swift in Sources */,
 				975334D01CEB6AE3007ED50B /* PreferenceGeneralController.swift in Sources */,
+				976AB2E01D4BDBFA005DDE77 /* Language+CoreDataProperties.swift in Sources */,
 				979CB6C81D05CF37005E1BA1 /* SearchResultController.swift in Sources */,
 				975B90F91CEB75CB00D13906 /* ZimFilesController.swift in Sources */,
-				971187981CEB542500B9909D /* Language+CoreDataProperties.swift in Sources */,
 				9752279F1D020C00001D1DDE /* reader.cpp in Sources */,
 				97BA32A51CEBC36300339A47 /* RootWindowController.swift in Sources */,
 				979CB6CA1D05D26E005E1BA1 /* WebViewController.swift in Sources */,
 				9711878E1CEB541100B9909D /* Kiwix.xcdatamodeld in Sources */,
-				971187961CEB542500B9909D /* DownloadTask+CoreDataProperties.swift in Sources */,
 				975334D21CEB6B01007ED50B /* LibraryController.swift in Sources */,
 				975227AC1D020D83001D1DDE /* ZimIndexer.mm in Sources */,
 				975227A11D020C00001D1DDE /* resourceTools.cpp in Sources */,
 				975227A81D020C2E001D1DDE /* htmlparse.cc in Sources */,
-				971187971CEB542500B9909D /* Article+CoreDataProperties.swift in Sources */,
 				975227A31D020C00001D1DDE /* stringTools.cpp in Sources */,
 				979C518D1CECAE4C001707F2 /* PreferenceWindowController.swift in Sources */,
 				9711879B1CEB546C00B9909D /* CoreDataExtension.swift in Sources */,
@@ -1616,9 +1616,9 @@
 				975227AE1D0213D3001D1DDE /* xapianIndexer.cpp in Sources */,
 				971187911CEB541A00B9909D /* Book.swift in Sources */,
 				971187901CEB541600B9909D /* MigrationPolicy.swift in Sources */,
-				971187951CEB542500B9909D /* Book+CoreDataProperties.swift in Sources */,
 				979CB60F1D04AD04005E1BA1 /* PreferenceTabController.swift in Sources */,
 				975227991D020C00001D1DDE /* indexer.cpp in Sources */,
+				976AB2DD1D4BDBFA005DDE77 /* Book+CoreDataProperties.swift in Sources */,
 				971187921CEB541A00B9909D /* Language.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1664,6 +1664,7 @@
 				97A7017F1D2C59CA00AAE2D8 /* GetStartedController.swift in Sources */,
 				979C51521CECA9AF001707F2 /* StringTools.swift in Sources */,
 				9779A1CD1D34225E0071EFAB /* UIOperations.swift in Sources */,
+				976AB2D91D4BDBFA005DDE77 /* Book+CoreDataProperties.swift in Sources */,
 				9711878D1CEB541100B9909D /* Kiwix.xcdatamodeld in Sources */,
 				9752279E1D020C00001D1DDE /* reader.cpp in Sources */,
 				97D452BC1D16FF010033666F /* RecentSearchCVC.swift in Sources */,
@@ -1684,8 +1685,6 @@
 				971A105B1D022DAD007FC62C /* LibraryOnlineTBVC.swift in Sources */,
 				9779A1CB1D34225E0071EFAB /* RefreshLibraryOperation.swift in Sources */,
 				971A10321D022AD5007FC62C /* SearchBar.swift in Sources */,
-				977998741C1E0B7900B1DD5E /* Book+CoreDataProperties.swift in Sources */,
-				977998751C1E0B7900B1DD5E /* DownloadTask+CoreDataProperties.swift in Sources */,
 				970C3DCA1CBD79450026A240 /* MigrationPolicy.swift in Sources */,
 				97E891691CA976E90001CA32 /* FileManager.swift in Sources */,
 				97E60A061D10504000EBCB9D /* LibraryBackupTBVC.swift in Sources */,
@@ -1703,24 +1702,25 @@
 				975B90FE1CEB909100D13906 /* iOSExtensions.swift in Sources */,
 				973DD4251D344558009D45DB /* ScanLocalBookOperation.swift in Sources */,
 				971A10521D022D9D007FC62C /* AppDelegate.swift in Sources */,
-				977998781C1E0B7900B1DD5E /* Language+CoreDataProperties.swift in Sources */,
 				97D452BE1D1723FF0033666F /* CollectionViewCells.swift in Sources */,
 				971A102F1D022AD5007FC62C /* Logo.swift in Sources */,
 				97D55EF61D2075180081B523 /* TableOfContentsController.swift in Sources */,
 				9722122B1D3FCCE200C0DCF2 /* MainControllerShowHide.swift in Sources */,
 				9779A1C81D34225E0071EFAB /* AlertOperation.swift in Sources */,
 				971A104B1D022CBE007FC62C /* SearchBooksVC.swift in Sources */,
-				977998771C1E0B7900B1DD5E /* Article+CoreDataProperties.swift in Sources */,
 				971C4F0E1D400F010027B7D2 /* UpdateWidgetDataSourceOperation.swift in Sources */,
 				971187301CEB50FC00B9909D /* ZimReader.mm in Sources */,
+				976AB2DB1D4BDBFA005DDE77 /* Article+CoreDataProperties.swift in Sources */,
 				971A103C1D022C2C007FC62C /* FontSizeTBVC.swift in Sources */,
 				971A103B1D022C2C007FC62C /* AdjustLayoutTBVC.swift in Sources */,
 				975227A21D020C00001D1DDE /* stringTools.cpp in Sources */,
 				97219DBD1D383A00009FDFF1 /* BookmarkController.swift in Sources */,
 				9711879A1CEB546C00B9909D /* CoreDataExtension.swift in Sources */,
 				970C61971D34243600087758 /* URLSessionDownloadTaskOperation.swift in Sources */,
+				976AB2DC1D4BDBFA005DDE77 /* Language+CoreDataProperties.swift in Sources */,
 				971A10341D022AEC007FC62C /* BookmarkTBVC.swift in Sources */,
 				975227A01D020C00001D1DDE /* resourceTools.cpp in Sources */,
+				976AB2DA1D4BDBFA005DDE77 /* DownloadTask+CoreDataProperties.swift in Sources */,
 				971A10601D022DF2007FC62C /* LanguageTBVC.swift in Sources */,
 				971A106C1D022E50007FC62C /* Utilities.swift in Sources */,
 				973DD4281D36E3E4009D45DB /* SettingSingleSwitchTBVC.swift in Sources */,
