@@ -71,8 +71,8 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     // MARK: - Fetched Results Controller
     
     let managedObjectContext = NSManagedObjectContext.mainQueueContext
-    lazy var fetchedResultController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Book")
+    lazy var fetchedResultController: NSFetchedResultsController<Book> = {
+        let fetchRequest = NSFetchRequest<Book>(entityName: "Book")
         let langDescriptor = SortDescriptor(key: "language.name", ascending: true)
         let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [langDescriptor, titleDescriptor]

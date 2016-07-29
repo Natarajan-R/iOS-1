@@ -36,7 +36,7 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
         guard let controller = segue.destinationViewController as? LibraryLocalBookDetailTBVC,
               let cell = sender as? UITableViewCell,
               let indexPath = tableView.indexPath(for: cell),
-              let book = fetchedResultController.object(at: indexPath) as? Book else {return}
+              let book = fetchedResultController.object(at: indexPath) else {return}
         controller.book = book
     }
     
@@ -65,7 +65,7 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
     }
     
     func configureMessage() {
-        guard let books = fetchedResultController.fetchedObjects as? [Book] else {return}
+        guard let books = fetchedResultController.fetchedObjects else {return}
         let totalSize = books.reduce(0) {$0 + ($1.fileSize)}
         let spaceString = String.formattedFileSizeString(totalSize)
         let localizedString = String.localizedStringWithFormat(NSLocalizedString("Taking up %@ in total", comment: "Book Library, local book message"), spaceString)
@@ -206,8 +206,8 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
     // MARK: - Fetched Results Controller
     
     let managedObjectContext = UIApplication.appDelegate.managedObjectContext
-    lazy var fetchedResultController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Book")
+    lazy var fetchedResultController: NSFetchedResultsController<Book> = {
+        let fetchRequest = NSFetchRequest<Book>(entityName: "Book")
         let langDescriptor = SortDescriptor(key: "language.name", ascending: true)
         let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [langDescriptor, titleDescriptor]

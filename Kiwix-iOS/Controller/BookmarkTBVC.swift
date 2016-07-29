@@ -140,8 +140,8 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
     
     let managedObjectContext = UIApplication.appDelegate.managedObjectContext
     
-    lazy var fetchedResultController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Article")
+    lazy var fetchedResultController: NSFetchedResultsController<Article> = {
+        let fetchRequest = NSFetchRequest<Article>(entityName: "Article")
         let dateDescriptor = SortDescriptor(key: "bookmarkDate", ascending: false)
         let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [dateDescriptor, titleDescriptor]

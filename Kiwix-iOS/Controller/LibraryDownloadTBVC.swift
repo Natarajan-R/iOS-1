@@ -59,7 +59,7 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     }
     
     private func refreshProgress(animated: Bool) {
-        guard let downloadTasks = fetchedResultController.fetchedObjects as? [DownloadTask] else {return}
+        guard let downloadTasks = fetchedResultController.fetchedObjects else {return}
         for downloadTask in downloadTasks {
             guard let id = downloadTask.book?.id,
                 let indexPath = fetchedResultController.indexPath(forObject: downloadTask),
@@ -246,8 +246,8 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     // MARK: - Fetched Results Controller
     
     let managedObjectContext = UIApplication.appDelegate.managedObjectContext
-    lazy var fetchedResultController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "DownloadTask")
+    lazy var fetchedResultController: NSFetchedResultsController<DownloadTask> = {
+        let fetchRequest = NSFetchRequest<DownloadTask>(entityName: "DownloadTask")
         let creationTimeDescriptor = SortDescriptor(key: "creationTime", ascending: true)
         fetchRequest.sortDescriptors = [creationTimeDescriptor]
         
