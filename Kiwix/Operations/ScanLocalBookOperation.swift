@@ -13,17 +13,17 @@ class ScanLocalBookOperation: Operation {
     private let context: NSManagedObjectContext
     private var firstBookAdded = false
     
-    private var lastZimFileURLSnapshot: Set<NSURL>
-    private var currentZimFileURLSnapshot = Set<NSURL>()
-    private let lastIndexFolderURLSnapshot: Set<NSURL>
-    private var currentIndexFolderURLSnapshot = Set<NSURL>()
+    private var lastZimFileURLSnapshot: Set<URL>
+    private var currentZimFileURLSnapshot = Set<URL>()
+    private let lastIndexFolderURLSnapshot: Set<URL>
+    private var currentIndexFolderURLSnapshot = Set<URL>()
     
-    private var completionHandler: ((currentZimFileURLSnapshot: Set<NSURL>, currentIndexFolderURLSnapshot: Set<NSURL>, firstBookAdded: Bool) -> Void)
+    private var completionHandler: ((currentZimFileURLSnapshot: Set<URL>, currentIndexFolderURLSnapshot: Set<URL>, firstBookAdded: Bool) -> Void)
     
-    init(lastZimFileURLSnapshot: Set<NSURL>, lastIndexFolderURLSnapshot: Set<NSURL>,
-         completionHandler: ((currentZimFileURLSnapshot: Set<NSURL>, currentIndexFolderURLSnapshot: Set<NSURL>, firstBookAdded: Bool) -> Void)) {
-        self.context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        context.parentContext = NSManagedObjectContext.mainQueueContext
+    init(lastZimFileURLSnapshot: Set<URL>, lastIndexFolderURLSnapshot: Set<URL>,
+         completionHandler: ((currentZimFileURLSnapshot: Set<URL>, currentIndexFolderURLSnapshot: Set<URL>, firstBookAdded: Bool) -> Void)) {
+        self.context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        context.parent = NSManagedObjectContext.mainQueueContext
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
         self.lastZimFileURLSnapshot = lastZimFileURLSnapshot
@@ -42,7 +42,7 @@ class ScanLocalBookOperation: Operation {
         currentIndexFolderURLSnapshot = ScanLocalBookOperation.getCurrentIndexFolderURLsInDocDir()
         
 //        let zimFileHasChanges = lastZimFileURLSnapshot != currentZimFileURLSnapshot
-        let indexFolderHasDeletions = lastIndexFolderURLSnapshot.subtract(currentIndexFolderURLSnapshot).count > 0
+        let indexFolderHasDeletions = lastIndexFolderURLSnapshot.subtracting(currentIndexFolderURLSnapshot).count > 0
         
 //        guard zimFileHasChanges || indexFolderHasDeletions else {return}
         
@@ -54,18 +54,18 @@ class ScanLocalBookOperation: Operation {
         updateCoreData()
     }
     
-    override func finished(errors: [NSError]) {
-        context.performBlockAndWait {self.context.saveIfNeeded()}
-        NSManagedObjectContext.mainQueueContext.performBlockAndWait {NSManagedObjectContext.mainQueueContext.saveIfNeeded()}
-        NSOperationQueue.mainQueue().addOperationWithBlock { 
+    override func finished(_ errors: [NSError]) {
+        context.performAndWait {self.context.saveIfNeeded()}
+        NSManagedObjectContext.mainQueueContext.performAndWait {NSManagedObjectContext.mainQueueContext.saveIfNeeded()}
+        OperationQueue.main.addOperation { 
             self.completionHandler(currentZimFileURLSnapshot: self.currentZimFileURLSnapshot,
                 currentIndexFolderURLSnapshot: self.currentIndexFolderURLSnapshot, firstBookAdded: self.firstBookAdded)
         }
     }
     
     private func updateReaders() {
-        let addedZimFileURLs = currentZimFileURLSnapshot.subtract(lastZimFileURLSnapshot)
-        let removedZimFileURLs = lastZimFileURLSnapshot.subtract(currentZimFileURLSnapshot)
+        let addedZimFileURLs = currentZimFileURLSnapshot.subtracting(lastZimFileURLSnapshot)
+        let removedZimFileURLs = lastZimFileURLSnapshot.subtracting(currentZimFileURLSnapshot)
         
         guard addedZimFileURLs.count > 0 || removedZimFileURLs.count > 0 else {return}
         ZimMultiReader.sharedInstance.removeReaders(removedZimFileURLs)
@@ -75,15 +75,15 @@ class ScanLocalBookOperation: Operation {
     private func updateCoreData() {
         let localBooks = Book.fetchLocal(context)
         let zimReaderIDs = Set(ZimMultiReader.sharedInstance.readers.keys)
-        let addedZimFileIDs = zimReaderIDs.subtract(Set(localBooks.keys))
-        let removedZimFileIDs = Set(localBooks.keys).subtract(zimReaderIDs)
+        let addedZimFileIDs = zimReaderIDs.subtracting(Set(localBooks.keys))
+        let removedZimFileIDs = Set(localBooks.keys).subtracting(zimReaderIDs)
         
         for id in removedZimFileIDs {
             guard let book = localBooks[id] else {continue}
             if let _ = book.meta4URL {
                 book.isLocal = false
             } else {
-                context.deleteObject(book)
+                context.delete(book)
             }
         }
         
@@ -95,7 +95,7 @@ class ScanLocalBookOperation: Operation {
             }()
             book?.isLocal = true
             book?.hasIndex = reader.hasIndex()
-            book?.hasPic = !reader.fileURL.absoluteString.containsString("nopic")
+            book?.hasPic = !reader.fileURL.absoluteString.contains("nopic")
         }
         
         for (id, book) in localBooks {
@@ -111,17 +111,17 @@ class ScanLocalBookOperation: Operation {
     
     // MARK: - Helper
     
-    private class func getCurrentZimFileURLsInDocDir() -> Set<NSURL> {
-        let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [NSURL]()
-        var zimURLs = Set<NSURL>()
+    private class func getCurrentZimFileURLsInDocDir() -> Set<URL> {
+        let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [URL]()
+        var zimURLs = Set<URL>()
         for url in fileURLs {
             do {
                 var isDirectory: AnyObject? = nil
-                try url.getResourceValue(&isDirectory, forKey: NSURLIsDirectoryKey)
+                try (url as NSURL).getResourceValue(&isDirectory, forKey: URLResourceKey.isDirectoryKey)
                 if let isDirectory = (isDirectory as? NSNumber)?.boolValue {
                     if !isDirectory {
-                        guard let pathExtension = url.pathExtension?.lowercaseString else {continue}
-                        guard pathExtension.containsString("zim") else {continue}
+                        guard let pathExtension = url.pathExtension?.lowercased() else {continue}
+                        guard pathExtension.contains("zim") else {continue}
                         zimURLs.insert(url)
                     }
                 }
@@ -132,16 +132,16 @@ class ScanLocalBookOperation: Operation {
         return zimURLs
     }
     
-    private class func getCurrentIndexFolderURLsInDocDir() -> Set<NSURL> {
-        let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [NSURL]()
-        var folderURLs = Set<NSURL>()
+    private class func getCurrentIndexFolderURLsInDocDir() -> Set<URL> {
+        let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [URL]()
+        var folderURLs = Set<URL>()
         for url in fileURLs {
             do {
                 var isDirectory: AnyObject? = nil
-                try url.getResourceValue(&isDirectory, forKey: NSURLIsDirectoryKey)
+                try (url as NSURL).getResourceValue(&isDirectory, forKey: URLResourceKey.isDirectoryKey)
                 if let isDirectory = (isDirectory as? NSNumber)?.boolValue {
                     if isDirectory {
-                        guard let pathExtension = url.pathExtension?.lowercaseString else {continue}
+                        guard let pathExtension = url.pathExtension?.lowercased() else {continue}
                         guard pathExtension == "idx" else {continue}
                         folderURLs.insert(url)
                     }

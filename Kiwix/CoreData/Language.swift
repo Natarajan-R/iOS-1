@@ -12,8 +12,8 @@ import CoreData
 
 class Language: NSManagedObject {
 
-    class func fetchOrAdd(code: String, context: NSManagedObjectContext) -> Language? {
-        let code = NSLocale.canonicalLanguageIdentifierFromString(code)
+    class func fetchOrAdd(_ code: String, context: NSManagedObjectContext) -> Language? {
+        let code = Locale.canonicalLanguageIdentifier(from: code)
 
         if let language = fetch(code, context: context) {
             return language
@@ -21,23 +21,23 @@ class Language: NSManagedObject {
         
         guard let language = insert(Language.self, context: context) else {return nil}
         language.code = code
-        language.name = NSLocale.currentLocale().displayNameForKey(NSLocaleLanguageCode, value: code)
+        language.name = Locale.current.displayName(forKey: Locale.Key.languageCode, value: code)
         return language
     }
     
-    class func fetch(code: String, context: NSManagedObjectContext) -> Language? {
+    class func fetch(_ code: String, context: NSManagedObjectContext) -> Language? {
         let fetchRequest = NSFetchRequest(entityName: "Language")
-        fetchRequest.predicate = NSPredicate(format: "code == %@", code)
+        fetchRequest.predicate = Predicate(format: "code == %@", code)
         return fetch(fetchRequest, type: Language.self, context: context)?.first
     }
     
-    class func fetch(displayed displayed: Bool, context: NSManagedObjectContext) -> [Language] {
+    class func fetch(displayed: Bool, context: NSManagedObjectContext) -> [Language] {
         let fetchRequest = NSFetchRequest(entityName: "Language")
-        fetchRequest.predicate = NSPredicate(format: "isDisplayed == %@ AND name != nil", displayed)
+        fetchRequest.predicate = Predicate(format: "isDisplayed == %@ AND name != nil", displayed)
         return fetch(fetchRequest, type: Language.self, context: context) ?? [Language]()
     }
     
-    class func fetchAll(context: NSManagedObjectContext) -> [Language] {
+    class func fetchAll(_ context: NSManagedObjectContext) -> [Language] {
         let fetchRequest = NSFetchRequest(entityName: "Language")
         return fetch(fetchRequest, type: Language.self, context: context) ?? [Language]()
     }

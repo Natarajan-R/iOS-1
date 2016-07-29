@@ -12,9 +12,9 @@ import CoreData
 
 class Article: NSManagedObject {
 
-    class func addOrUpdate(title: String? = nil, url: NSURL, book: Book, context: NSManagedObjectContext) -> Article? {
+    class func addOrUpdate(_ title: String? = nil, url: URL, book: Book, context: NSManagedObjectContext) -> Article? {
         let fetchRequest = NSFetchRequest(entityName: "Article")
-        fetchRequest.predicate = NSPredicate(format: "urlString = %@", url.absoluteString)
+        fetchRequest.predicate = Predicate(format: "urlString = %@", url.absoluteString)
         let article = Article.fetch(fetchRequest, type: Article.self, context: context)?.first ?? insert(Article.self, context: context)
         
         article?.title = title
@@ -24,27 +24,27 @@ class Article: NSManagedObject {
         return article
     }
     
-    class func fetchRecentBookmarks(count: Int, context: NSManagedObjectContext) -> [Article] {
+    class func fetchRecentBookmarks(_ count: Int, context: NSManagedObjectContext) -> [Article] {
         let fetchRequest = NSFetchRequest(entityName: "Article")
-        let dateDescriptor = NSSortDescriptor(key: "bookmarkDate", ascending: false)
-        let titleDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let dateDescriptor = SortDescriptor(key: "bookmarkDate", ascending: false)
+        let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [dateDescriptor, titleDescriptor]
-        fetchRequest.predicate = NSPredicate(format: "isBookmarked == true")
+        fetchRequest.predicate = Predicate(format: "isBookmarked == true")
         fetchRequest.fetchLimit = count
         return fetch(fetchRequest, type: Article.self, context: context) ?? [Article]()
     }
     
     // MARK: - Helper
     
-    var url: NSURL? {
+    var url: URL? {
         guard let urlString = urlString else {return nil}
-        return NSURL(string: urlString)
+        return URL(string: urlString)
     }
     
-    var thumbImageData: NSData? {
+    var thumbImageData: Data? {
         if let urlString = thumbImageURL,
-            let url = NSURL(string: urlString),
-            let data = NSData(contentsOfURL: url) {
+            let url = URL(string: urlString),
+            let data = try? Data(contentsOf: url) {
             return data
         } else {
             return book?.favIcon
@@ -58,8 +58,8 @@ class Article: NSManagedObject {
         return [
             "title": title,
             "thumbImageData": data,
-            "url": url.absoluteString,
-            "isMainPage": NSNumber(bool: isMainPage)
+            "url": url.absoluteString!,
+            "isMainPage": NSNumber(value: isMainPage)
         ]
     }
 

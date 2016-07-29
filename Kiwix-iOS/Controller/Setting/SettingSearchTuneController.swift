@@ -26,7 +26,7 @@ class SettingSearchTuneController: UIViewController, UITableViewDataSource {
         super.viewDidLoad()
         title = "y=ln(n-mx) 🤓"
         
-        let button = UIBarButtonItem(title: "Calculate", style: .Plain, target: self, action: #selector(SettingSearchTuneController.calculate))
+        let button = UIBarButtonItem(title: "Calculate", style: .plain, target: self, action: #selector(SettingSearchTuneController.calculate))
         navigationItem.rightBarButtonItem = button
         
         tableView.dataSource = self
@@ -46,7 +46,7 @@ class SettingSearchTuneController: UIViewController, UITableViewDataSource {
         calculate()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         Defaults[.x1] = Double(x1Value.text ?? "") ?? 0
         Defaults[.x2] = Double(x2Value.text ?? "") ?? 0
         Defaults[.y1] = Double(y1Value.text ?? "") ?? 0
@@ -76,30 +76,30 @@ class SettingSearchTuneController: UIViewController, UITableViewDataSource {
     
     // MARK: -  UITableViewDataSource
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 2
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 10
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        let prob: Double = indexPath.section == 0 ? ((100 - Double(indexPath.row)) / 100.0) : ((10.0 - Double(indexPath.row)) / 10.0)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let prob: Double = (indexPath as NSIndexPath).section == 0 ? ((100 - Double((indexPath as NSIndexPath).row)) / 100.0) : ((10.0 - Double((indexPath as NSIndexPath).row)) / 10.0)
         cell.textLabel?.text = "\(prob * 100)%"
         cell.detailTextLabel?.text = String(format: "%.5f", WeightFactor.calculate(prob) ?? "NA")
         return cell
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return section == 0 ? "100% -- 90%" : "100% -- 10%"
     }
 }
 
 class WeightFactor {
-    class func calculate(prob: Double) -> Double {
-        if UIApplication.buildStatus == .Alpha {
+    class func calculate(_ prob: Double) -> Double {
+        if UIApplication.buildStatus == .alpha {
             if let m = Defaults[.m], let n = Defaults[.n] {
                 return caluclateLog(m: m, n: n, prob: prob)
             } else {
@@ -112,7 +112,7 @@ class WeightFactor {
         }
     }
     
-    private class func caluclateLog(m m: Double, n: Double, prob: Double) -> Double {
+    private class func caluclateLog(m: Double, n: Double, prob: Double) -> Double {
         let e = 2.718281828459
         return log(n - m * prob) / log(e)
     }

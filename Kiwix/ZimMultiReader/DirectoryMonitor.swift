@@ -23,16 +23,16 @@ class DirectoryMonitor {
     var monitoredDirectoryFileDescriptor: CInt = -1
     
     /// A dispatch queue used for sending file changes in the directory.
-    let directoryMonitorQueue = dispatch_queue_create("org.kiwix.directorymonitor", DISPATCH_QUEUE_CONCURRENT)
+    let directoryMonitorQueue = DispatchQueue(label: "org.kiwix.directorymonitor", attributes: DispatchQueueAttributes.concurrent)
     
     /// A dispatch source to monitor a file descriptor created from the directory.
-    var directoryMonitorSource: dispatch_source_t?
+    var directoryMonitorSource: DispatchSource?
     
     /// URL for the directory being monitored.
-    var URL: NSURL
+    var URL: Foundation.URL
     
     // MARK: Initializers
-    init(URL: NSURL) {
+    init(URL: Foundation.URL) {
         self.URL = URL
     }
     
@@ -45,17 +45,17 @@ class DirectoryMonitor {
             monitoredDirectoryFileDescriptor = open(URL.path!, O_EVTONLY)
             
             // Define a dispatch source monitoring the directory for additions, deletions, and renamings.
-            directoryMonitorSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, UInt(monitoredDirectoryFileDescriptor), DISPATCH_VNODE_WRITE, directoryMonitorQueue)
+            directoryMonitorSource = DispatchSource.fileSystemObject(fileDescriptor: monitoredDirectoryFileDescriptor, eventMask: DispatchSource.FileSystemEvent.write, queue: directoryMonitorQueue) /*Migrator FIXME: Use DispatchSourceFileSystemObject to avoid the cast*/ as! DispatchSource
             
             // Define the block to call when a file change is detected.
-            dispatch_source_set_event_handler(directoryMonitorSource!) {
+            directoryMonitorSource!.setEventHandler {
                 // Call out to the `DirectoryMonitorDelegate` so that it can react appropriately to the change.
                 self.directoryContentDidChange()
                 return
             }
             
             // Define a cancel handler to ensure the directory is closed when the source is cancelled.
-            dispatch_source_set_cancel_handler(directoryMonitorSource!) {
+            directoryMonitorSource!.setCancelHandler {
                 close(self.monitoredDirectoryFileDescriptor)
                 
                 self.monitoredDirectoryFileDescriptor = -1
@@ -64,7 +64,7 @@ class DirectoryMonitor {
             }
             
             // Start monitoring the directory via the source.
-            dispatch_resume(directoryMonitorSource!)
+            directoryMonitorSource!.resume()
         }
     }
     
@@ -72,7 +72,7 @@ class DirectoryMonitor {
         // Stop listening for changes to the directory, if the source has been created.
         if directoryMonitorSource != nil {
             // Stop monitoring the directory via the source.
-            dispatch_source_cancel(directoryMonitorSource!)
+            directoryMonitorSource!.cancel()
         }
     }
     
@@ -117,13 +117,13 @@ class DirectoryMonitor {
     }
     
     private func directoryDidReachStasis() {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC/10)) , dispatch_get_main_queue(), { () -> Void in
+        DispatchQueue.main.after(when: DispatchTime.now() + Double(Int64(NSEC_PER_SEC/10)) / Double(NSEC_PER_SEC) , execute: { () -> Void in
             self.delegate?.directoryMonitorDidObserveChange()
         })
     }
     
     private func waitAndCheckAgain() {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC/2)) , directoryMonitorQueue, { () -> Void in
+        directoryMonitorQueue.after(when: DispatchTime.now() + Double(Int64(NSEC_PER_SEC/2)) / Double(NSEC_PER_SEC) , execute: { () -> Void in
             self.checkDirectoryChanges()
         })
     }
@@ -134,7 +134,7 @@ class DirectoryMonitor {
         var hashes = [String]()
         if let path = self.URL.path {
             do {
-                let contents = try NSFileManager.defaultManager().contentsOfDirectoryAtPath(path)
+                let contents = try Foundation.FileManager.default.contentsOfDirectory(atPath: path)
                 for file in contents {
                     if let hash = fileHash(file) {
                         hashes.append(hash)
@@ -148,7 +148,7 @@ class DirectoryMonitor {
         return hashes
     }
     
-    private func fileHash(fileName: String) -> String? {
+    private func fileHash(_ fileName: String) -> String? {
         if let fileSize = fileSize(fileName) {
             return fileName + "_\(fileSize)"
         } else {
@@ -156,13 +156,13 @@ class DirectoryMonitor {
         }
     }
     
-    private func fileSize(fileName: String) -> Int64? {
-        if let path = self.URL.URLByAppendingPathComponent(fileName).path {
-            if NSFileManager.defaultManager().fileExistsAtPath(path) {
+    private func fileSize(_ fileName: String) -> Int64? {
+        if let path = try! self.URL.appendingPathComponent(fileName).path {
+            if Foundation.FileManager.default.fileExists(atPath: path) {
                 do {
-                    let attributes = try NSFileManager.defaultManager().attributesOfItemAtPath(path)
-                    let fileSize = attributes[NSFileSize] as? NSNumber
-                    return fileSize?.longLongValue
+                    let attributes = try Foundation.FileManager.default.attributesOfItem(atPath: path)
+                    let fileSize = attributes[FileAttributeKey.size] as? NSNumber
+                    return fileSize?.int64Value
                 } catch let error as NSError {
                     // failure
                     print("attributesOfItemAtPath failed: \(error.localizedDescription)")

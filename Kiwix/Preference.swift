@@ -17,14 +17,14 @@ class Preference {
     
     // MARK: - Recent Search
     
-    class func addRecentSearchTerm(searchTerm: String) {
-        recentSearchTerms.insert(searchTerm, atIndex: 0)
+    class func addRecentSearchTerm(_ searchTerm: String) {
+        recentSearchTerms.insert(searchTerm, at: 0)
     }
     
     class var recentSearchTerms: [String] {
         get{return Defaults[.recentSearchTerms]}
         set{
-            let searchTerms = NSOrderedSet(array: newValue).array as! [String]
+            let searchTerms = OrderedSet(array: newValue).array as! [String]
             Defaults[.recentSearchTerms] = searchTerms.count > 20 ? Array(searchTerms[0..<20]) : searchTerms
         }
     }
@@ -43,7 +43,7 @@ class Preference {
     
     // MARK: - Rate Kiwix
     
-    class var activeUseHistory: [NSDate] {
+    class var activeUseHistory: [Date] {
         get{return Defaults[.activeUseHistory]}
         set{Defaults[.activeUseHistory] = newValue}
     }
@@ -65,12 +65,12 @@ class Preference {
         set{Defaults[.libraryRefreshNotAllowCellularData] = !newValue}
     }
     
-    class var libraryLastRefreshTime: NSDate? {
+    class var libraryLastRefreshTime: Date? {
         get{return Defaults[.libraryLastRefreshTime]}
         set{Defaults[.libraryLastRefreshTime] = newValue}
     }
     
-    class var libraryRefreshInterval: NSTimeInterval {
+    class var libraryRefreshInterval: TimeInterval {
         get{return Defaults[.libraryRefreshInterval] ?? 3600.0 * 24}
         set{Defaults[.libraryRefreshInterval] = newValue}
     }

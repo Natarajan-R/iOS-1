@@ -9,7 +9,7 @@
 import CoreData
 import PSOperations
 
-class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSURLSessionTaskDelegate, OperationQueueDelegate {
+class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSessionTaskDelegate, OperationQueueDelegate {
     static let sharedInstance = Network()
     weak var delegate: DownloadProgressReporting?
     
@@ -17,15 +17,15 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     let operationQueue = OperationQueue()
     
     var progresses = [String: DownloadProgress]()
-    private var timer: NSTimer?
+    private var timer: Foundation.Timer?
     private var shouldReportProgress = false
     private var completionHandler: (()-> Void)?
     
-    lazy var session: NSURLSession = {
-        let configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("org.kiwix.www")
+    lazy var session: Foundation.URLSession = {
+        let configuration = URLSessionConfiguration.background(withIdentifier: "org.kiwix.www")
         configuration.allowsCellularAccess = false
-        configuration.discretionary = false
-        return NSURLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        configuration.isDiscretionary = false
+        return Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
     
     override init() {
@@ -49,7 +49,7 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
         }
     }
     
-    func rejoinSessionWithIdentifier(identifier: String, completionHandler: ()-> Void) {
+    func rejoinSessionWithIdentifier(_ identifier: String, completionHandler: ()-> Void) {
         guard identifier == session.configuration.identifier else {return}
         self.completionHandler = completionHandler
     }
@@ -58,41 +58,41 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     
     // MARK: - Tasks
     
-    func download(book: Book) {
+    func download(_ book: Book) {
         guard let url = book.url else {return}
         book.isLocal = nil
-        let task = session.downloadTaskWithURL(url)
+        let task = session.downloadTask(with: url)
         startTask(task, book: book)
     }
     
-    func resume(book: Book) {
+    func resume(_ book: Book) {
         guard let resumeData = FileManager.readResumeData(book) else {
             // TODO: Alert
             print("Could not resume, data mmissing / damaged")
             return
         }
-        let task = session.downloadTaskWithResumeData(resumeData)
+        let task = session.downloadTask(withResumeData: resumeData)
         startTask(task, book: book)
     }
     
-    func pause(book: Book) {
+    func pause(_ book: Book) {
         guard let id = book.id,
             let operation = operationQueue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: true)
     }
     
-    func cancel(book: Book) {
+    func cancel(_ book: Book) {
         guard let id = book.id,
             let operation = operationQueue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: false)
     }
     
-    private func startTask(task: NSURLSessionDownloadTask, book: Book) {
+    private func startTask(_ task: URLSessionDownloadTask, book: Book) {
         guard let id = book.id else {return}
         task.taskDescription = id
         
         let downloadTask = DownloadTask.addOrUpdate(book, context: context)
-        downloadTask?.state = .Queued
+        downloadTask?.state = .queued
         
         let operation = URLSessionDownloadTaskOperation(downloadTask: task)
         operation.name = id
@@ -106,17 +106,17 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     
     // MARK: - OperationQueueDelegate
     
-    func operationQueue(operationQueue: OperationQueue, willAddOperation operation: NSOperation) {
+    func operationQueue(_ operationQueue: OperationQueue, willAddOperation operation: Operation) {
         guard operationQueue.operationCount == 0 else {return}
         shouldReportProgress = true
-        NSOperationQueue.mainQueue().addOperationWithBlock { () -> Void in
-            self.timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(Network.resetProgressReportingFlag), userInfo: nil, repeats: true)
+        OperationQueue.main.addOperation { () -> Void in
+            self.timer = Foundation.Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(Network.resetProgressReportingFlag), userInfo: nil, repeats: true)
         }
     }
     
-    func operationQueue(operationQueue: OperationQueue, operationDidFinish operation: NSOperation, withErrors errors: [NSError]) {
+    func operationQueue(_ operationQueue: OperationQueue, operationDidFinish operation: Operation, withErrors errors: [NSError]) {
         guard operationQueue.operationCount == 1 else {return}
-        NSOperationQueue.mainQueue().addOperationWithBlock { () -> Void in
+        OperationQueue.main.addOperation { () -> Void in
             self.timer?.invalidate()
             self.shouldReportProgress = false
         }
@@ -124,8 +124,8 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     
     // MARK: - NSURLSessionDelegate
     
-    func URLSessionDidFinishEventsForBackgroundURLSession(session: NSURLSession) {
-        NSOperationQueue.mainQueue().addOperationWithBlock {
+    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        OperationQueue.main.addOperation {
             self.completionHandler?()
             
             let notification = UILocalNotification()
@@ -138,14 +138,14 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     
     // MARK: - NSURLSessionTaskDelegate
     
-    func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: NSError?) {
         guard let error = error, let id = task.taskDescription,
             let progress = progresses[id], let downloadTask = progress.book.downloadTask else {return}
         progress.downloadTerminated()
         if error.code == NSURLErrorCancelled {
-            context.performBlock({ () -> Void in
-                downloadTask.state = .Paused
-                guard let resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData] as? NSData else {
+            context.perform({ () -> Void in
+                downloadTask.state = .paused
+                guard let resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData] as? Data else {
                     downloadTask.totalBytesWritten = 0
                     return
                 }
@@ -158,29 +158,29 @@ class Network: NSObject, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSU
     
     // MARK: - NSURLSessionDownloadDelegate
     
-    func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let id = downloadTask.taskDescription,
               let book = progresses[id]?.book,
               let bookDownloadTask = book.downloadTask else {return}
         
-        context.performBlockAndWait { () -> Void in
-            self.context.deleteObject(bookDownloadTask)
+        context.performAndWait { () -> Void in
+            self.context.delete(bookDownloadTask)
         }
         
         progresses[id] = nil
         FileManager.move(book, fromURL: location, suggestedFileName: downloadTask.response?.suggestedFilename)
     }
     
-    func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let id = downloadTask.taskDescription,
               let downloadTask = progresses[id]?.book.downloadTask else {return}
-        context.performBlockAndWait { () -> Void in
-            guard downloadTask.state == .Queued else {return}
-            downloadTask.state = .Downloading
+        context.performAndWait { () -> Void in
+            guard downloadTask.state == .queued else {return}
+            downloadTask.state = .downloading
         }
         
         guard shouldReportProgress else {return}
-        NSOperationQueue.mainQueue().addOperationWithBlock { () -> Void in
+        OperationQueue.main.addOperation { () -> Void in
             self.delegate?.refreshProgress()
         }
         shouldReportProgress = false

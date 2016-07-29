@@ -19,9 +19,9 @@ class CustomSearchBar: UISearchBar, UITextFieldDelegate {
     }
     
     convenience init() {
-        self.init(frame: CGRectZero)
-        self.searchBarStyle = .Minimal
-        setImage(UIImage(named: "BlankImage"), forSearchBarIcon: .Search, state: .Normal)
+        self.init(frame: CGRect.zero)
+        self.searchBarStyle = .minimal
+        setImage(UIImage(named: "BlankImage"), for: .search, state: UIControlState())
     }
     
     override func layoutSubviews() {
@@ -37,7 +37,7 @@ class CustomSearchBar: UISearchBar, UITextFieldDelegate {
     // MARK: - vars
     
     let customSearchField = UITextField()
-    let leftImageView = UIImageView(image: UIImage(named: "Wiki")?.imageWithRenderingMode(.AlwaysTemplate))
+    let leftImageView = UIImageView(image: UIImage(named: "Wiki")?.withRenderingMode(.alwaysTemplate))
     let rightImageView = UIImageView(image: UIImage(named: "StarHighlighted"))
     
     // MARK: - Configure
@@ -47,24 +47,24 @@ class CustomSearchBar: UISearchBar, UITextFieldDelegate {
             for view in subviews {
                 for view in view.subviews {
                     guard let searchField = view as? UITextField else {continue}
-                    searchField.userInteractionEnabled = false
+                    searchField.isUserInteractionEnabled = false
                     return searchField
                 }
             }
             return nil
         }()
         
-        customSearchField.clearButtonMode = .WhileEditing
+        customSearchField.clearButtonMode = .whileEditing
         customSearchField.translatesAutoresizingMaskIntoConstraints = false
         customSearchField.font = originalSearchField?.font
         customSearchField.textColor = originalSearchField?.textColor
         customSearchField.placeholder = placeholder
-        customSearchField.textAlignment = customSearchField.editing ? .Left : .Center
-        customSearchField.autocapitalizationType = .None
-        customSearchField.autocorrectionType = .No
-        customSearchField.spellCheckingType = .No
+        customSearchField.textAlignment = customSearchField.isEditing ? .left : .center
+        customSearchField.autocapitalizationType = .none
+        customSearchField.autocorrectionType = .no
+        customSearchField.spellCheckingType = .no
         customSearchField.delegate = self
-        customSearchField.addTarget(self, action: #selector(CustomSearchBar.textFieldDidChange(_:)), forControlEvents: .EditingChanged)
+        customSearchField.addTarget(self, action: #selector(CustomSearchBar.textFieldDidChange(_:)), for: .editingChanged)
         addSubview(customSearchField)
         
         placeholder = nil
@@ -72,18 +72,18 @@ class CustomSearchBar: UISearchBar, UITextFieldDelegate {
         
         let views = ["searchField": customSearchField]
         let metrics = ["rightInset": -2]
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[searchField]-(rightInset)-|", options: .AlignAllCenterY, metrics: metrics, views: views))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-[searchField]-|", options: .AlignAllCenterX, metrics: metrics, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-[searchField]-(rightInset)-|", options: .alignAllCenterY, metrics: metrics, views: views))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-[searchField]-|", options: .alignAllCenterX, metrics: metrics, views: views))
     }
     
     // MARK: - UITextFieldDelegate
     
-    func textFieldDidBeginEditing(textField: UITextField) {
-        customSearchField.textAlignment = .Left
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        customSearchField.textAlignment = .left
         delegate?.searchBarTextDidBeginEditing?(self)
     }
     
-    func textFieldDidChange(textField: UITextField) {
+    func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else {return}
         delegate?.searchBar?(self, textDidChange: text)
     }
@@ -101,10 +101,10 @@ class SearchBar: UISearchBar {
     }
     
     convenience init() {
-        self.init(frame: CGRectZero)
-        self.searchBarStyle = .Minimal
-        self.autocapitalizationType = .None
+        self.init(frame: CGRect.zero)
+        self.searchBarStyle = .minimal
+        self.autocapitalizationType = .none
         self.placeholder = LocalizedStrings.search
-        self.returnKeyType = .Go
+        self.returnKeyType = .go
     }
 }

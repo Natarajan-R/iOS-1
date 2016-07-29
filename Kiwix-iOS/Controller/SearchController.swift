@@ -27,19 +27,19 @@ class SearchController: UIViewController, UISearchBarDelegate, UIGestureRecogniz
         tapGestureRecognizer.delegate = self
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         configureViewVisibility()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         guard searchText != "" else {return}
-        Preference.recentSearchTerms.insert(searchText, atIndex: 0)
+        Preference.recentSearchTerms.insert(searchText, at: 0)
         searchText = ""
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "EmbeddedSearchResultTBVC" {
             guard let destinationViewController = segue.destinationViewController as? SearchResultTBVC else {return}
             searchResultTBVC = destinationViewController
@@ -48,21 +48,21 @@ class SearchController: UIViewController, UISearchBarDelegate, UIGestureRecogniz
     
     func configureViewVisibility() {
         if searchText == "" {
-            searchResultTBVCContainer.hidden = true
-            tabControllerContainer.hidden = false
+            searchResultTBVCContainer.isHidden = true
+            tabControllerContainer.isHidden = false
         } else {
-            searchResultTBVCContainer.hidden = false
-            tabControllerContainer.hidden = true
+            searchResultTBVCContainer.isHidden = false
+            tabControllerContainer.isHidden = true
         }
     }
     
     // MARK: - Search
     
-    func startSearch(searchText: String, delayed: Bool) {
+    func startSearch(_ searchText: String, delayed: Bool) {
         self.searchText = searchText
         if delayed {
             let previousSearchText = searchText
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(275 * USEC_PER_SEC)), dispatch_get_main_queue()) {
+            DispatchQueue.main.after(when: DispatchTime.now() + Double(Int64(275 * USEC_PER_SEC)) / Double(NSEC_PER_SEC)) {
                 //print("\(previousSearchText), \(self.searchText)")
                 guard previousSearchText == self.searchText else {return}
                 self.searchResultTBVC?.startSearch(self.searchText)
@@ -74,12 +74,12 @@ class SearchController: UIViewController, UISearchBarDelegate, UIGestureRecogniz
     
     // MARK: - Handle Gesture
     
-    func handleTap(tapGestureRecognizer: UIGestureRecognizer) {
-        guard let mainVC = parentViewController as? MainController else {return}
+    func handleTap(_ tapGestureRecognizer: UIGestureRecognizer) {
+        guard let mainVC = parent as? MainController else {return}
         mainVC.hideSearch(animated: true)
     }
     
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         return touch.view == view ? true : false
     }
     

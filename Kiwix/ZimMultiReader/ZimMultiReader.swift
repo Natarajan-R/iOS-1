@@ -20,8 +20,8 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     private(set) var isScanning = false
     private(set) var readers = [ZimID: ZimReader]()
     private let monitor = DirectoryMonitor(URL: FileManager.docDirURL)
-    private var lastZimFileURLSnapshot = Set<NSURL>()
-    private var lastIndexFolderURLSnapshot = Set<NSURL>()
+    private var lastZimFileURLSnapshot = Set<URL>()
+    private var lastIndexFolderURLSnapshot = Set<URL>()
     
     override init() {
         super.init()
@@ -51,15 +51,15 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     
     // MARK: - Reader Addition / Deletion
     
-    func addReaders(urls: Set<NSURL>) {
+    func addReaders(_ urls: Set<URL>) {
         for url in urls {
-            guard let reader = ZimReader(ZIMFileURL: url) else {continue}
+            guard let reader = ZimReader(zimFileURL: url) else {continue}
             let id = reader.getID()
-            readers[id] = reader
+            readers[id!] = reader
         }
     }
     
-    func removeReaders(urls: Set<NSURL>) {
+    func removeReaders(_ urls: Set<URL>) {
         for (id, reader) in readers {
             guard urls.contains(reader.fileURL) else {continue}
             readers[id] = nil
@@ -74,7 +74,7 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     
     // MARK: - Search
     
-    func startSearch(searchOperation: SearchOperation) {
+    func startSearch(_ searchOperation: SearchOperation) {
         if let scanOperation = scanOperation {
             searchOperation.addDependency(scanOperation)
         }
@@ -88,17 +88,17 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     
     // MARK: Search (Old)
     
-    func search(searchTerm: String, zimFileID: String) -> [(id: String, articleTitle: String)] {
+    func search(_ searchTerm: String, zimFileID: String) -> [(id: String, articleTitle: String)] {
         var resultTuples = [(id: String, articleTitle: String)]()
         let firstCharRange = searchTerm.startIndex...searchTerm.startIndex
-        let firstLetterCapitalisedSearchTerm = searchTerm.stringByReplacingCharactersInRange(firstCharRange, withString: searchTerm.substringWithRange(firstCharRange).capitalizedString)
-        let searchTermVariations = Set([searchTerm, searchTerm.uppercaseString, searchTerm.lowercaseString, searchTerm.capitalizedString, firstLetterCapitalisedSearchTerm])
+        let firstLetterCapitalisedSearchTerm = searchTerm.replacingCharacters(in: firstCharRange, with: searchTerm.substring(with: firstCharRange).capitalized)
+        let searchTermVariations = Set([searchTerm, searchTerm.uppercased(), searchTerm.lowercased(), searchTerm.capitalized, firstLetterCapitalisedSearchTerm])
         
         let reader = readers[zimFileID]
         var results = Set<String>()
         for searchTermVariation in searchTermVariations {
             guard let result = reader?.searchSuggestionsSmart(searchTermVariation) as? [String] else {continue}
-            results.unionInPlace(result)
+            results.formUnion(result)
         }
         
         for result in results {
@@ -110,14 +110,14 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     
     // MARK: - Loading System
     
-    func data(id: String, contentURLString: String) -> [String: AnyObject]? {
+    func data(_ id: String, contentURLString: String) -> [String: AnyObject]? {
         guard let reader = readers[id] else {return nil}
-        return reader.dataWithContentURLString(contentURLString) as? [String: AnyObject]
+        return reader.data(withContentURLString: contentURLString) as? [String: AnyObject]
     }
     
-    func pageURLString(articleTitle: String, bookid id: String) -> String? {
+    func pageURLString(_ articleTitle: String, bookid id: String) -> String? {
         guard let reader = readers[id] else {return nil}
-        return reader.pageURLFromTitle(articleTitle)
+        return reader.pageURL(fromTitle: articleTitle)
     }
     
     func mainPageURLString(bookid id: String) -> String? {

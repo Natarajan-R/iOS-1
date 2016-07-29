@@ -13,11 +13,11 @@ import UIKit
 // MARK: - CoreData
 
 extension NSFetchedResultsController {
-    func performFetch(deleteCache deleteCache: Bool) {
+    func performFetch(deleteCache: Bool) {
         do {
             if deleteCache {
                 guard let cacheName = cacheName else {return}
-                NSFetchedResultsController.deleteCacheWithName(cacheName)
+                NSFetchedResultsController.deleteCache(withName: cacheName)
             }
             
             try performFetch()
@@ -29,20 +29,20 @@ extension NSFetchedResultsController {
 
 extension NSManagedObjectContext {
     class var mainQueueContext: NSManagedObjectContext {
-        return (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+        return (UIApplication.shared().delegate as! AppDelegate).managedObjectContext
     }
 }
 
 // MARK: - UI
 
 enum BuildStatus {
-    case Alpha, Beta, Release
+    case alpha, beta, release
 }
 
 extension UIApplication {
     class var buildStatus: BuildStatus {
         get {
-            return .Release
+            return .release
         }
     }
 }
@@ -54,20 +54,20 @@ extension UIStoryboard {
     class var setting: UIStoryboard {get {return UIStoryboard(name: "Setting", bundle: nil)}}
     class var welcome: UIStoryboard {get {return UIStoryboard(name: "Welcome", bundle: nil)}}
     
-    func initViewController<T:UIViewController>(type: T.Type) -> T? {
-        guard let className = NSStringFromClass(T).componentsSeparatedByString(".").last else {
+    func initViewController<T:UIViewController>(_ type: T.Type) -> T? {
+        guard let className = NSStringFromClass(T).components(separatedBy: ".").last else {
             print("NSManagedObjectExtension: Unable to get class name")
             return nil
         }
-        return instantiateViewControllerWithIdentifier(className) as? T
+        return instantiateViewController(withIdentifier: className) as? T
     }
     
-    func initViewController<T:UIViewController>(identifier: String, type: T.Type) -> T? {
-        return instantiateViewControllerWithIdentifier(identifier) as? T
+    func initViewController<T:UIViewController>(_ identifier: String, type: T.Type) -> T? {
+        return instantiateViewController(withIdentifier: identifier) as? T
     }
     
-    func controller<T:UIViewController>(type: T.Type) -> T? {
-        return instantiateViewControllerWithIdentifier(String(T)) as? T
+    func controller<T:UIViewController>(_ type: T.Type) -> T? {
+        return instantiateViewController(withIdentifier: String(T)) as? T
     }
 }
 
@@ -83,13 +83,13 @@ extension UIColor {
 
 extension UITableView {
     
-    func setBackgroundText(text: String?) {
+    func setBackgroundText(_ text: String?) {
         let label = UILabel()
-        label.textAlignment = .Center
+        label.textAlignment = .center
         label.text = text
-        label.font = UIFont.boldSystemFontOfSize(20.0)
+        label.font = UIFont.boldSystemFont(ofSize: 20.0)
         label.numberOfLines = 0
-        label.textColor = UIColor.grayColor()
+        label.textColor = UIColor.gray()
         backgroundView = label
     }
 }
@@ -97,16 +97,16 @@ extension UITableView {
 extension UINavigationBar {
     func hideBottomHairline() {
         let navigationBarImageView = hairlineImageViewInNavigationBar(self)
-        navigationBarImageView!.hidden = true
+        navigationBarImageView!.isHidden = true
     }
     
     func showBottomHairline() {
         let navigationBarImageView = hairlineImageViewInNavigationBar(self)
-        navigationBarImageView!.hidden = false
+        navigationBarImageView!.isHidden = false
     }
     
-    private func hairlineImageViewInNavigationBar(view: UIView) -> UIImageView? {
-        if view.isKindOfClass(UIImageView) && view.bounds.height <= 1.0 {
+    private func hairlineImageViewInNavigationBar(_ view: UIView) -> UIImageView? {
+        if view.isKind(of: UIImageView.self) && view.bounds.height <= 1.0 {
             return (view as! UIImageView)
         }
         
@@ -123,16 +123,16 @@ extension UINavigationBar {
 extension UIToolbar {
     func hideHairline() {
         let navigationBarImageView = hairlineImageViewInToolbar(self)
-        navigationBarImageView!.hidden = true
+        navigationBarImageView!.isHidden = true
     }
     
     func showHairline() {
         let navigationBarImageView = hairlineImageViewInToolbar(self)
-        navigationBarImageView!.hidden = false
+        navigationBarImageView!.isHidden = false
     }
     
-    private func hairlineImageViewInToolbar(view: UIView) -> UIImageView? {
-        if view.isKindOfClass(UIImageView) && view.bounds.height <= 1.0 {
+    private func hairlineImageViewInToolbar(_ view: UIView) -> UIImageView? {
+        if view.isKind(of: UIImageView.self) && view.bounds.height <= 1.0 {
             return (view as! UIImageView)
         }
         
@@ -149,7 +149,7 @@ extension UIToolbar {
 // MARK: - View Controller
 
 extension UIAlertController {
-    convenience init(title: String, message: String, style: UIAlertControllerStyle = .Alert, actions:[UIAlertAction]) {
+    convenience init(title: String, message: String, style: UIAlertControllerStyle = .alert, actions:[UIAlertAction]) {
         self.init(title: title, message: message , preferredStyle: style)
         for action in actions {addAction(action)}
     }

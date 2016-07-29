@@ -23,8 +23,8 @@ class RefreshLibraryOperation: GroupOperation {
         let parseOperation = ParseLibraryOperation()
         
         // 0.Download library
-        let url = NSURL(string: "http://www.kiwix.org/library.xml")!
-        let task = NSURLSession.sharedSession().dataTaskWithURL(url) { [unowned parseOperation] (data, response, error) -> Void in
+        let url = URL(string: "http://www.kiwix.org/library.xml")!
+        let task = URLSession.shared.dataTask(with: url) { [unowned parseOperation] (data, response, error) -> Void in
             if let error = error {self.aggregateError(error)}
             parseOperation.xmlData = data
         }
@@ -45,21 +45,21 @@ class RefreshLibraryOperation: GroupOperation {
         parseOperation.addDependency(fetchOperation)
     }
     
-    override func finished(errors: [NSError]) {
+    override func finished(_ errors: [NSError]) {
         completionHandler?(errors: errors)
     }
 }
 
-class ParseLibraryOperation: Operation, NSXMLParserDelegate {
-    var xmlData: NSData?
+class ParseLibraryOperation: Operation, XMLParserDelegate {
+    var xmlData: Data?
     let context: NSManagedObjectContext
     
     var oldBookIDs = Set<String>()
     var newBookIDs = Set<String>()
     
     override init() {
-        self.context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        context.parentContext = NSManagedObjectContext.mainQueueContext
+        self.context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        context.parent = NSManagedObjectContext.mainQueueContext
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         super.init()
         name = String(ParseLibraryOperation)
@@ -67,7 +67,7 @@ class ParseLibraryOperation: Operation, NSXMLParserDelegate {
     
     override func execute() {
         guard let data = xmlData else {finish(); return}
-        let xmlParser = NSXMLParser(data: data)
+        let xmlParser = XMLParser(data: data)
         xmlParser.delegate = self
         xmlParser.parse()
         finish()
@@ -75,55 +75,55 @@ class ParseLibraryOperation: Operation, NSXMLParserDelegate {
     
     // MARK: NSXMLParser Delegate
     
-    @objc internal func parserDidStartDocument(parser: NSXMLParser) {
-        context.performBlockAndWait { () -> Void in
+    @objc internal func parserDidStartDocument(_ parser: XMLParser) {
+        context.performAndWait { () -> Void in
             self.oldBookIDs = Set(Book.fetchAll(self.context).map({$0.id ?? ""}))
         }
     }
     
-    @objc internal func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+    @objc internal func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         guard elementName == "book" else {return}
         guard let id = attributeDict["id"] else {return}
         
         if !oldBookIDs.contains(id) {
-            context.performBlockAndWait({ () -> Void in
+            context.performAndWait({ () -> Void in
                 Book.add(attributeDict, context: self.context)
             })
         }
         newBookIDs.insert(id)
     }
     
-    @objc internal func parserDidEndDocument(parser: NSXMLParser) {
+    @objc internal func parserDidEndDocument(_ parser: XMLParser) {
         // ID of Books on device but no longer in library.xml
-        let ids = oldBookIDs.subtract(newBookIDs)
+        let ids = oldBookIDs.subtracting(newBookIDs)
         
         for id in ids {
-            context.performBlockAndWait({ () -> Void in
+            context.performAndWait({ () -> Void in
                 guard let book = Book.fetch(id, context: self.context) else {return}
                 
                 // Delete Book object only if book is online, i.e., is not associated with a download task or is not local
                 guard book.isLocal == false else {return}
-                self.context.deleteObject(book)
+                self.context.delete(book)
             })
         }
 
         saveManagedObjectContexts()
-        Preference.libraryLastRefreshTime = NSDate()
+        Preference.libraryLastRefreshTime = Date()
         //print("Parse finished successfully")
     }
     
-    @objc internal func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
+    @objc internal func parser(_ parser: XMLParser, parseErrorOccurred parseError: NSError) {
         saveManagedObjectContexts()
     }
     
     // MARK: - Tools
     
     func saveManagedObjectContexts() {
-        context.performBlockAndWait { () -> Void in
+        context.performAndWait { () -> Void in
             self.context.saveIfNeeded()
         }
-        context.parentContext?.performBlockAndWait({ () -> Void in
-            self.context.parentContext?.saveIfNeeded()
+        context.parent?.performAndWait({ () -> Void in
+            self.context.parent?.saveIfNeeded()
         })
     }
 }
@@ -134,11 +134,11 @@ private struct AllowAutoRefreshCondition: OperationCondition {
     
     init() {}
     
-    func dependencyForOperation(operation: Operation) -> NSOperation? {
+    func dependencyForOperation(_ operation: Operation) -> Operation? {
         return nil
     }
     
-    func evaluateForOperation(operation: Operation, completion: OperationConditionResult -> Void) {
+    func evaluateForOperation(_ operation: Operation, completion: (OperationConditionResult) -> Void) {
         let allowAutoRefresh = !Preference.libraryAutoRefreshDisabled
         
         if allowAutoRefresh {

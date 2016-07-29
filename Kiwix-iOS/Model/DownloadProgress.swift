@@ -8,18 +8,18 @@
 
 import UIKit
 
-class DownloadProgress: NSProgress {
+class DownloadProgress: Progress {
     let book: Book
     private let observationCount = 9
-    private let sampleFrequency: NSTimeInterval = 0.3
+    private let sampleFrequency: TimeInterval = 0.3
     private var speeds = [Double]()
-    private var timer: NSTimer?
-    private weak var task: NSURLSessionDownloadTask?
+    private var timer: Foundation.Timer?
+    private weak var task: URLSessionDownloadTask?
     
     init(book: Book) {
         self.book = book
-        super.init(parent: nil, userInfo: [NSProgressFileOperationKindKey: NSProgressFileOperationKindDownloading])
-        self.kind = NSProgressKindFile
+        super.init(parent: nil, userInfo: [ProgressUserInfoKey.fileOperationKindKey: Progress.FileOperationKind.downloading])
+        self.kind = ProgressKind.file
         self.totalUnitCount = book.fileSize
         self.completedUnitCount = book.downloadTask?.totalBytesWritten ?? 0
         print("totalBytesWritten: \(book.downloadTask?.totalBytesWritten)")
@@ -29,17 +29,17 @@ class DownloadProgress: NSProgress {
         timer?.invalidate()
     }
     
-    func downloadStarted(task: NSURLSessionDownloadTask) {
+    func downloadStarted(_ task: URLSessionDownloadTask) {
         self.task = task
         recordSpeed()
-        timer = NSTimer.scheduledTimerWithTimeInterval(sampleFrequency, target: self, selector: #selector(DownloadProgress.recordSpeed), userInfo: nil, repeats: true)
+        timer = Foundation.Timer.scheduledTimer(timeInterval: sampleFrequency, target: self, selector: #selector(DownloadProgress.recordSpeed), userInfo: nil, repeats: true)
     }
     
     func downloadTerminated() {
         timer?.invalidate()
         speeds.removeAll()
-        setUserInfoObject(nil, forKey: NSProgressThroughputKey)
-        setUserInfoObject(nil, forKey: NSProgressEstimatedTimeRemainingKey)
+        setUserInfoObject(nil, forKey: ProgressUserInfoKey.throughputKey)
+        setUserInfoObject(nil, forKey: ProgressUserInfoKey.estimatedTimeRemainingKey)
     }
     
     func recordSpeed() {
@@ -56,7 +56,7 @@ class DownloadProgress: NSProgress {
         completedUnitCount = task.countOfBytesReceived
         totalUnitCount = task.countOfBytesExpectedToReceive
         let speed = Double(completedUnitCount - previousCompletedUnitCount) / sampleFrequency
-        speeds.insert(speed, atIndex: 0)
+        speeds.insert(speed, at: 0)
         if speeds.count > observationCount {speeds.popLast()}
     }
     
@@ -78,43 +78,43 @@ class DownloadProgress: NSProgress {
     // MARK: - Descriptions
     
     var sizeDescription: String {
-        return localizedAdditionalDescription.componentsSeparatedByString(" — ").first ?? ""
+        return localizedAdditionalDescription.components(separatedBy: " — ").first ?? ""
     }
     
     var speedAndRemainingTimeDescription: String? {
         guard let maSpeed = self.maSpeed else {return nil}
-        setUserInfoObject(NSNumber(double: maSpeed), forKey: NSProgressThroughputKey)
+        setUserInfoObject(NSNumber(value: maSpeed), forKey: ProgressUserInfoKey.throughputKey)
         
         let remainingSeconds = Double(totalUnitCount - completedUnitCount) / maSpeed
-        setUserInfoObject(NSNumber(double: remainingSeconds), forKey: NSProgressEstimatedTimeRemainingKey)
+        setUserInfoObject(NSNumber(value: remainingSeconds), forKey: ProgressUserInfoKey.estimatedTimeRemainingKey)
         
-        let components = localizedAdditionalDescription.componentsSeparatedByString(" — ")
+        let components = localizedAdditionalDescription.components(separatedBy: " — ")
         return components.count > 1 ? components.last : nil
     }
     
     var percentDescription: String {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .PercentStyle
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
         formatter.maximumIntegerDigits = 3
         formatter.maximumFractionDigits = 0
-        formatter.locale = NSLocale.currentLocale()
-        return formatter.stringFromNumber(NSNumber(double: fractionCompleted)) ?? ""
+        formatter.locale = Locale.current
+        return formatter.string(from: NSNumber(value: fractionCompleted)) ?? ""
     }
     
     var sizeAndPercentDescription: String {
         var strings = [String]()
         strings.append(sizeDescription)
         strings.append(percentDescription)
-        return strings.joinWithSeparator(" - ")
+        return strings.joined(separator: " - ")
     }
     
     override var description: String {
         guard let state = book.downloadTask?.state else {return " \n "}
         switch state {
-        case .Queued: return sizeAndPercentDescription + "\n" + LocalizedStrings.queued
-        case .Downloading: return sizeAndPercentDescription + "\n" + (speedAndRemainingTimeDescription ?? LocalizedStrings.estimatingSpeedAndRemainingTime)
-        case .Paused: return sizeAndPercentDescription + "\n" + LocalizedStrings.paused
-        case .Error: return sizeDescription + "\n" + LocalizedStrings.downloadError
+        case .queued: return sizeAndPercentDescription + "\n" + LocalizedStrings.queued
+        case .downloading: return sizeAndPercentDescription + "\n" + (speedAndRemainingTimeDescription ?? LocalizedStrings.estimatingSpeedAndRemainingTime)
+        case .paused: return sizeAndPercentDescription + "\n" + LocalizedStrings.paused
+        case .error: return sizeDescription + "\n" + LocalizedStrings.downloadError
         }
     }
 }

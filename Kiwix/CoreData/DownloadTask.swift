@@ -12,17 +12,17 @@ import CoreData
 
 class DownloadTask: NSManagedObject {
 
-    class func addOrUpdate(book: Book, context: NSManagedObjectContext) -> DownloadTask? {
+    class func addOrUpdate(_ book: Book, context: NSManagedObjectContext) -> DownloadTask? {
         let fetchRequest = NSFetchRequest(entityName: "DownloadTask")
-        fetchRequest.predicate = NSPredicate(format: "book = %@", book)
+        fetchRequest.predicate = Predicate(format: "book = %@", book)
         let downloadTask = DownloadTask.fetch(fetchRequest, type: DownloadTask.self, context: context)?.first ?? insert(DownloadTask.self, context: context)
         
-        downloadTask?.creationTime = NSDate()
+        downloadTask?.creationTime = Date()
         downloadTask?.book = book
         return downloadTask
     }
     
-    class func fetchAll(context: NSManagedObjectContext) -> [DownloadTask] {
+    class func fetchAll(_ context: NSManagedObjectContext) -> [DownloadTask] {
         let fetchRequest = NSFetchRequest(entityName: "DownloadTask")
         return fetch(fetchRequest, type: DownloadTask.self, context: context) ?? [DownloadTask]()
     }
@@ -30,10 +30,10 @@ class DownloadTask: NSManagedObject {
     var state: DownloadTaskState {
         get {
             switch stateRaw {
-            case 0: return .Queued
-            case 1: return .Downloading
-            case 2: return .Paused
-            default: return .Error
+            case 0: return .queued
+            case 1: return .downloading
+            case 2: return .paused
+            default: return .error
             }
         }
         set {
@@ -44,5 +44,5 @@ class DownloadTask: NSManagedObject {
 }
 
 enum DownloadTaskState: Int {
-    case Queued, Downloading, Paused, Error
+    case queued, downloading, paused, error
 }

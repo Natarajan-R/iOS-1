@@ -24,7 +24,7 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
         tableView.emptyDataSetDelegate = self
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setEditing(false, animated: false)
         navigationController?.setToolbarHidden(true, animated: true)
@@ -37,59 +37,59 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(scrollView: UIScrollView!) -> UIImage! {
+    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "BookmarkColor")
     }
     
-    func titleForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("Bookmarks", comment: "Bookmarks view title")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(18.0),
-                          NSForegroundColorAttributeName: UIColor.darkGrayColor()]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
+                          NSForegroundColorAttributeName: UIColor.darkGray()]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func descriptionForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func descriptionForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("To add a bookmark, long press the star button when reading an article", comment: "Bookmarks view message")
         let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .ByWordWrapping
-        style.alignment = .Center
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(14.0),
-                          NSForegroundColorAttributeName: UIColor.lightGrayColor(),
+        style.lineBreakMode = .byWordWrapping
+        style.alignment = .center
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14.0),
+                          NSForegroundColorAttributeName: UIColor.lightGray(),
                           NSParagraphStyleAttributeName: style]
-        return NSAttributedString(string: text, attributes: attributes)
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func spaceHeightForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return fetchedResultController.sections?.count ?? 0
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let sectionInfo = fetchedResultController.sections?[section] else {return 0}
         return sectionInfo.numberOfObjects
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let article = fetchedResultController.objectAtIndexPath(indexPath) as? Article
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let article = fetchedResultController.object(at: indexPath) as? Article
         if let _ = article?.snippet {
-            let cell = tableView.dequeueReusableCellWithIdentifier("BookmarkSnippetCell", forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "BookmarkSnippetCell", for: indexPath)
             configureSnippetCell(cell, atIndexPath: indexPath)
             return cell
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("BookmarkCell", forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "BookmarkCell", for: indexPath)
             configureCell(cell, atIndexPath: indexPath)
             return cell
         }
     }
     
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
+    func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard let cell = cell as? BookmarkCell else {return}
-        guard let article = fetchedResultController.objectAtIndexPath(indexPath) as? Article else {return}
+        guard let article = fetchedResultController.object(at: indexPath) as? Article else {return}
         
         cell.thumbImageView.image = {
             guard let data = article.thumbImageData else {return nil}
@@ -99,36 +99,36 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
         cell.subtitleLabel.text = article.book?.title
     }
     
-    func configureSnippetCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
+    func configureSnippetCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         configureCell(cell, atIndexPath: indexPath)
         
         guard let cell = cell as? BookmarkSnippetCell else {return}
-        guard let article = fetchedResultController.objectAtIndexPath(indexPath) as? Article else {return}
+        guard let article = fetchedResultController.object(at: indexPath) as? Article else {return}
         cell.snippetLabel.text = article.snippet
     }
     
     // MARK: - Table view delegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        guard !tableView.editing else {return}
-        defer {dismissViewControllerAnimated(true, completion: nil)}
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !tableView.isEditing else {return}
+        defer {dismiss(animated: true, completion: nil)}
         guard let navigationController = navigationController?.presentingViewController as? UINavigationController else {return}
         guard let mainVC = navigationController.topViewController as? MainController else {return}
-        guard let article = fetchedResultController.objectAtIndexPath(indexPath) as? Article else {return}
+        guard let article = fetchedResultController.object(at: indexPath) as? Article else {return}
         mainVC.load(article.url)
     }
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {}
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {}
     
-    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let remove = UITableViewRowAction(style: .Destructive, title: LocalizedStrings.remove) { (action, indexPath) -> Void in
-            guard let article = self.fetchedResultController.objectAtIndexPath(indexPath) as? Article else {return}
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let remove = UITableViewRowAction(style: UITableViewRowActionStyle(), title: LocalizedStrings.remove) { (action, indexPath) -> Void in
+            guard let article = self.fetchedResultController.object(at: indexPath) as? Article else {return}
             let context = NSManagedObjectContext.mainQueueContext
-            context.performBlockAndWait({ () -> Void in
+            context.performAndWait({ () -> Void in
                 article.isBookmarked = false
             })
             self.updateWidgetData()
@@ -142,11 +142,11 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
     
     lazy var fetchedResultController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Article")
-        let dateDescriptor = NSSortDescriptor(key: "bookmarkDate", ascending: false)
-        let titleDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let dateDescriptor = SortDescriptor(key: "bookmarkDate", ascending: false)
+        let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [dateDescriptor, titleDescriptor]
-        fetchRequest.predicate = NSPredicate(format: "isBookmarked == true")
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: nil, cacheName: "BookmarksFRC" + NSBundle.appShortVersion)
+        fetchRequest.predicate = Predicate(format: "isBookmarked == true")
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: nil, cacheName: "BookmarksFRC" + Bundle.appShortVersion)
         fetchedResultsController.delegate = self
         fetchedResultsController.performFetch(deleteCache: false)
         return fetchedResultsController
@@ -154,61 +154,61 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
 
     // MARK: - Fetched Result Controller Delegate
     
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
-        case .Insert:
-            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
-        case .Delete:
-            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
+        case .insert:
+            tableView.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+        case .delete:
+            tableView.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
         default:
             return
         }
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
-        case .Insert:
+        case .insert:
             guard let newIndexPath = newIndexPath else {return}
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
-        case .Delete:
+            tableView.insertRows(at: [newIndexPath], with: .fade)
+        case .delete:
             guard let indexPath = indexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        case .Update:
-            guard let indexPath = indexPath, let cell = tableView.cellForRowAtIndexPath(indexPath) else {return}
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        case .update:
+            guard let indexPath = indexPath, let cell = tableView.cellForRow(at: indexPath) else {return}
             configureCell(cell, atIndexPath: indexPath)
-        case .Move:
+        case .move:
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.insertRows(at: [newIndexPath], with: .fade)
         }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
     }
 
     // MARK: - Action
     
-    @IBAction func editingButtonTapped(sender: UIBarButtonItem) {
-        setEditing(!editing, animated: true)
-        navigationController?.setToolbarHidden(!editing, animated: true)
+    @IBAction func editingButtonTapped(_ sender: UIBarButtonItem) {
+        setEditing(!isEditing, animated: true)
+        navigationController?.setToolbarHidden(!isEditing, animated: true)
     }
     
-    @IBAction func removeBookmarkButtonTapped(sender: UIBarButtonItem) {
-        guard editing else {return}
+    @IBAction func removeBookmarkButtonTapped(_ sender: UIBarButtonItem) {
+        guard isEditing else {return}
         guard let selectedIndexPathes = tableView.indexPathsForSelectedRows else {return}
-        let artiicles = selectedIndexPathes.flatMap() {fetchedResultController.objectAtIndexPath($0) as? Article}
+        let artiicles = selectedIndexPathes.flatMap() {fetchedResultController.object(at: $0) as? Article}
         
         if artiicles.count > 0 {
             updateWidgetData()
         }
         
         let context = NSManagedObjectContext.mainQueueContext
-        context.performBlock { 
+        context.perform { 
             artiicles.forEach() {
                 $0.isBookmarked = false
                 $0.bookmarkDate = nil
@@ -216,8 +216,8 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
         }
     }
     
-    @IBAction func dismissButtonTapped(sender: UIBarButtonItem) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func dismissButtonTapped(_ sender: UIBarButtonItem) {
+        dismiss(animated: true, completion: nil)
     }
 }
 

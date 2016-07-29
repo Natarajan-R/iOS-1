@@ -19,7 +19,7 @@ class SpaceCautionAlert: AlertOperation {
         
         title = NSLocalizedString("Space Caution", comment: comment)
         message = NSLocalizedString("This book takes up more than 80% of the remaining space on your device. Are you sure you want to download it?", comment: comment)
-        addAction(NSLocalizedString("Download Anyway", comment: comment), style: .Default) { (action) -> Void in
+        addAction(NSLocalizedString("Download Anyway", comment: comment), style: .default) { (action) -> Void in
             Network.sharedInstance.download(book)
         }
         addAction(LocalizedStrings.cancel)
@@ -46,9 +46,9 @@ class RefreshLibraryLanguageFilterAlert: AlertOperation {
         var preferredLanguageCodes = [String]()
         var preferredLanguageNames = [String]()
         
-        for code in NSLocale.preferredLanguages() {
-            guard let code = code.componentsSeparatedByString("-").first else {continue}
-            guard let name = NSLocale.currentLocale().displayNameForKey(NSLocaleIdentifier, value: code) else {continue}
+        for code in Locale.preferredLanguages {
+            guard let code = code.components(separatedBy: "-").first else {continue}
+            guard let name = Locale.current.displayName(forKey: Locale.Key.identifier, value: code) else {continue}
             preferredLanguageCodes.append(code)
             preferredLanguageNames.append(name)
         }
@@ -65,7 +65,7 @@ class RefreshLibraryLanguageFilterAlert: AlertOperation {
             default:
                 let last = preferredLanguageNames.popLast()!
                 let secondToLast = preferredLanguageNames.popLast()!
-                return preferredLanguageNames.joinWithSeparator(", ") + ", " + andJoinedString(secondToLast, b: last)
+                return preferredLanguageNames.joined(separator: ", ") + ", " + andJoinedString(secondToLast, b: last)
             }
         }()
         
@@ -73,8 +73,8 @@ class RefreshLibraryLanguageFilterAlert: AlertOperation {
         
         title = NSLocalizedString("Only Show Preferred Language?", comment: comment)
         message = NSLocalizedString("We have found you may know \(languageString), would you like to filter the library by these languages?", comment: comment)
-        addAction(LocalizedStrings.ok, style: .Default) { (action) in
-            self.context.performBlock({
+        addAction(LocalizedStrings.ok, style: .default) { (action) in
+            self.context.perform({
                 let languages = Language.fetchAll(self.context)
                 for language in languages {
                     guard let code = language.code else {continue}
@@ -86,11 +86,11 @@ class RefreshLibraryLanguageFilterAlert: AlertOperation {
         addAction(LocalizedStrings.cancel)
     }
     
-    override func finished(errors: [NSError]) {
+    override func finished(_ errors: [NSError]) {
         Preference.libraryHasShownPreferredLanguagePrompt = true
     }
     
-    func andJoinedString(a: String, b: String) -> String {
+    func andJoinedString(_ a: String, b: String) -> String {
         return a + " " + LocalizedStrings.and + " " + b
     }
 }
@@ -115,10 +115,10 @@ class GetStartedAlert: AlertOperation {
         
         title = NSLocalizedString("Welcome to Kiwix", comment: comment)
         message = NSLocalizedString("Add a Book to Get Started", comment: comment)
-        addAction(NSLocalizedString("Download", comment: comment), style: .Default) { (alert) in
+        addAction(NSLocalizedString("Download", comment: comment), style: .default) { (alert) in
             mainController?.showLibraryButtonTapped()
         }
-        addAction(NSLocalizedString("Import", comment: comment), style: .Default) { (alert) in
+        addAction(NSLocalizedString("Import", comment: comment), style: .default) { (alert) in
             let operation = ShowHelpPageOperation(type: .ImportBookLearnMore, presentationContext: mainController)
             GlobalOperationQueue.sharedInstance.addOperation(operation)
         }
@@ -138,11 +138,11 @@ class ShowHelpPageOperation: Operation {
     }
     
     override func execute() {
-        NSOperationQueue.mainQueue().addOperationWithBlock { 
-            guard let controller = UIStoryboard.setting.instantiateViewControllerWithIdentifier("WebViewController") as? WebViewController else {return}
+        OperationQueue.main.addOperation { 
+            guard let controller = UIStoryboard.setting.instantiateViewController(withIdentifier: "WebViewController") as? WebViewController else {return}
             controller.page = self.type
             let navController = UINavigationController(rootViewController: controller)
-            self.presentationContext?.presentViewController(navController, animated: true, completion: nil)
+            self.presentationContext?.present(navController, animated: true, completion: nil)
         }
     }
 }

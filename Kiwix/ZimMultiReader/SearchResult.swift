@@ -19,7 +19,7 @@ class SearchResult: CustomStringConvertible {
     private(set) lazy var distance: Int = {
         // Here we dont use the swift version of levenshtein, because it is slower than the C++ implementation
         //return self.title.lowercaseString.levenshtein(string: self.lowerCaseSearchTerm)
-        return ZimReader.levenshtein(self.title.lowercaseString, anotherString: self.lowerCaseSearchTerm)
+        return ZimReader.levenshtein(self.title.lowercased(), anotherString: self.lowerCaseSearchTerm)
     }()
     private(set) lazy var score: Double = {
         if let probability = self.probability {
@@ -57,7 +57,7 @@ class SearchResult: CustomStringConvertible {
         var parts = [bookID, title]
         if let probability = probability {parts.append("\(probability)%")}
         parts.append("dist: \(distance)")
-        return parts.joinWithSeparator(", ")
+        return parts.joined(separator: ", ")
     }
     
     var rankInfo: String {

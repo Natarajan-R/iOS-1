@@ -12,8 +12,8 @@ class SettingWidgetBookmarksTBVC: UITableViewController {
     // widget row count
     private var rowCount = 1 {
         didSet {
-            let defaults = NSUserDefaults(suiteName: "group.kiwix")
-            defaults?.setInteger(rowCount ?? 1, forKey: "BookmarkWidgetMaxRowCount")
+            let defaults = UserDefaults(suiteName: "group.kiwix")
+            defaults?.set(rowCount ?? 1, forKey: "BookmarkWidgetMaxRowCount")
         }
     }
     
@@ -21,51 +21,51 @@ class SettingWidgetBookmarksTBVC: UITableViewController {
                    NSLocalizedString("Two Rows", comment: "Setting: Bookmark Widget"),
                    NSLocalizedString("Three Rows", comment: "Setting: Bookmark Widget")]
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         title = LocalizedStrings.bookmarks
-        if let defaults = NSUserDefaults(suiteName: "group.kiwix") {
-            rowCount = max(1, min(defaults.integerForKey("BookmarkWidgetMaxRowCount"), 3))
+        if let defaults = UserDefaults(suiteName: "group.kiwix") {
+            rowCount = max(1, min(defaults.integer(forKey: "BookmarkWidgetMaxRowCount"), 3))
         }
     }
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return options.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        cell.textLabel?.text = options[indexPath.row]
-        cell.accessoryType = indexPath.row == (rowCount - 1) ? .Checkmark : .None
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = options[(indexPath as NSIndexPath).row]
+        cell.accessoryType = (indexPath as NSIndexPath).row == (rowCount - 1) ? .checkmark : .none
         return cell
     }
     
-    override func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         return NSLocalizedString("Set the maximum number of rows displayed in Bookmarks Today Widget.", comment: "Setting: Bookmark Widget")
     }
     
     // MARK: - Table view delegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let oldIndexPath = NSIndexPath(forItem: rowCount - 1, inSection: 0)
-        guard let oldCell = tableView.cellForRowAtIndexPath(oldIndexPath),
-            let newCell = tableView.cellForRowAtIndexPath(indexPath) else {return}
-        oldCell.accessoryType = .None
-        newCell.accessoryType = .Checkmark
-        rowCount = indexPath.row + 1
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let oldIndexPath = IndexPath(item: rowCount - 1, section: 0)
+        guard let oldCell = tableView.cellForRow(at: oldIndexPath),
+            let newCell = tableView.cellForRow(at: indexPath) else {return}
+        oldCell.accessoryType = .none
+        newCell.accessoryType = .checkmark
+        rowCount = (indexPath as NSIndexPath).row + 1
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    override func tableView(tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
+    override func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
         guard section == 0 else {return}
         guard let view = view as? UITableViewHeaderFooterView else {return}
-        view.textLabel?.textAlignment = .Center
+        view.textLabel?.textAlignment = .center
     }
 }

@@ -11,12 +11,12 @@ import PSOperations
 private var URLSessionTaskOperationKVOContext = 0
 
 public class URLSessionDownloadTaskOperation: Operation {
-    let task: NSURLSessionDownloadTask
+    let task: URLSessionDownloadTask
     private var produceResumeData = false
     private var observerRemoved = false
-    private let stateLock = NSLock()
+    private let stateLock = Lock()
     
-    public init(downloadTask: NSURLSessionDownloadTask) {
+    public init(downloadTask: URLSessionDownloadTask) {
         self.task = downloadTask
         super.init()
         
@@ -30,32 +30,32 @@ public class URLSessionDownloadTaskOperation: Operation {
         }))
     }
     
-    public func cancel(produceResumeData produceResumeData: Bool) {
+    public func cancel(produceResumeData: Bool) {
         self.produceResumeData = produceResumeData
         cancel()
     }
     
     override public func execute() {
-        guard task.state == .Suspended || task.state == .Running else {
+        guard task.state == .suspended || task.state == .running else {
             finish()
             return
         }
         task.addObserver(self, forKeyPath: "state", options: NSKeyValueObservingOptions(), context: &URLSessionTaskOperationKVOContext)
-        if task.state == .Suspended {
+        if task.state == .suspended {
             task.resume()
         }
     }
     
-    override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override public func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         guard context == &URLSessionTaskOperationKVOContext else { return }
         
         stateLock.withCriticalScope {
             if object === task && keyPath == "state" && !observerRemoved {
                 switch task.state {
-                case .Completed:
+                case .completed:
                     finish()
                     fallthrough
-                case .Canceling:
+                case .canceling:
                     observerRemoved = true
                     task.removeObserver(self, forKeyPath: "state")
                 default:
@@ -66,8 +66,8 @@ public class URLSessionDownloadTaskOperation: Operation {
     }
 }
 
-private extension NSLock {
-    func withCriticalScope<T>(@noescape block: Void -> T) -> T {
+private extension Lock {
+    func withCriticalScope<T>(_ block: @noescape (Void) -> T) -> T {
         lock()
         let value = block()
         unlock()

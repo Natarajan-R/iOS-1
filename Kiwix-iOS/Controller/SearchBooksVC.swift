@@ -25,10 +25,10 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
 //        tableView.emptyDataSetDelegate = self
         tableView.tableHeaderView = UIView()
         tableView.tableFooterView = UIView()
-        tableView.keyboardDismissMode = .OnDrag
+        tableView.keyboardDismissMode = .onDrag
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
         configureRecentSearchBarHeight()
@@ -44,28 +44,28 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     
     // MARK: - Empty table datasource & delegate
     
-    func titleForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("No Book Available", comment: "Book Library, book downloader, no book center title")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(18.0),
-                          NSForegroundColorAttributeName: UIColor.darkGrayColor()]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
+                          NSForegroundColorAttributeName: UIColor.darkGray()]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func buttonTitleForEmptyDataSet(scrollView: UIScrollView!, forState state: UIControlState) -> NSAttributedString! {
+    func buttonTitleForEmptyDataSet(_ scrollView: UIScrollView!, forState state: UIControlState) -> AttributedString! {
         let text = NSLocalizedString("Download A Book", comment: "Book Library, book downloader, learn more button text")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(17.0), NSForegroundColorAttributeName: UIButton().tintColor]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: UIButton().tintColor]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func verticalOffsetForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return -64.0
     }
     
-    func spaceHeightForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return 0.0
     }
     
-    func emptyDataSetDidTapButton(scrollView: UIScrollView!) {
+    func emptyDataSetDidTapButton(_ scrollView: UIScrollView!) {
     }
     
     // MARK: - Fetched Results Controller
@@ -73,10 +73,10 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     let managedObjectContext = NSManagedObjectContext.mainQueueContext
     lazy var fetchedResultController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Book")
-        let langDescriptor = NSSortDescriptor(key: "language.name", ascending: true)
-        let titleDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let langDescriptor = SortDescriptor(key: "language.name", ascending: true)
+        let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [langDescriptor, titleDescriptor]
-        fetchRequest.predicate = NSPredicate(format: "isLocal == true")
+        fetchRequest.predicate = Predicate(format: "isLocal == true")
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: "language.name", cacheName: "ScopeFRC")
         fetchedResultsController.delegate = self
         fetchedResultsController.performFetch(deleteCache: false)
@@ -85,44 +85,44 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     
     // MARK: - Table Cell Delegate
     
-    func didTapOnAccessoryViewForCell(cell: UITableViewCell) {
-        guard let indexPath = tableView.indexPathForCell(cell),
-            let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book else {return}
+    func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell),
+            let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         book.includeInSearch = !book.includeInSearch
     }
 
     // MARK: - Table view data source
 
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return fetchedResultController.sections?.count ?? 0
     }
 
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let sectionInfo = fetchedResultController.sections?[section] else {return 0}
         return sectionInfo.numberOfObjects
     }
 
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("CheckMarkBookCell", forIndexPath: indexPath)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CheckMarkBookCell", for: indexPath)
         self.configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        guard let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book else {return}
+    func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
+        guard let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         guard let cell = cell as? CheckMarkBookCell else {return}
         
         cell.delegate = self
         cell.titleLabel.text = book.title
         cell.subtitleLabel.text = book.detailedDescription
 
-        cell.favIcon.image = UIImage(data: book.favIcon ?? NSData())
+        cell.favIcon.image = UIImage(data: book.favIcon ?? Data())
         cell.hasPic = book.hasPic
         cell.hasIndex = book.hasIndex
         cell.isChecked = book.includeInSearch
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard tableView.numberOfSections > 1 else {return nil}
         guard let languageName = fetchedResultController.sections?[section].name else {return nil}
         return languageName
@@ -130,62 +130,62 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     
     // MARK: Table view delegate
     
-    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         guard let headerText = self.tableView(tableView, titleForHeaderInSection: section) else {return 0.0}
         guard headerText != "" else {return 0.0}
         return 20.0
     }
     
-    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else {return}
-        header.textLabel?.font = UIFont.boldSystemFontOfSize(14)
+        header.textLabel?.font = UIFont.boldSystemFont(ofSize: 14)
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        guard let mainVC = parentViewController?.parentViewController as? MainController,
-            let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book,
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let mainVC = parent?.parent as? MainController,
+            let book = fetchedResultController.object(at: indexPath) as? Book,
             let bookID = book.id else {return}
         mainVC.hideSearch(animated: true)
         mainVC.loadMainPage(bookID)
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // MARK: - Fetched Result Controller Delegate
     
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
-        case .Insert:
-            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
-        case .Delete:
-            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
+        case .insert:
+            tableView.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+        case .delete:
+            tableView.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
         default:
             return
         }
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
-        case .Insert:
+        case .insert:
             guard let newIndexPath = newIndexPath else {return}
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
-        case .Delete:
+            tableView.insertRows(at: [newIndexPath], with: .fade)
+        case .delete:
             guard let indexPath = indexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        case .Update:
-            guard let indexPath = indexPath, let cell = tableView.cellForRowAtIndexPath(indexPath) else {return}
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        case .update:
+            guard let indexPath = indexPath, let cell = tableView.cellForRow(at: indexPath) else {return}
             configureCell(cell, atIndexPath: indexPath)
-        case .Move:
+        case .move:
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.insertRows(at: [newIndexPath], with: .fade)
         }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
     }
 }

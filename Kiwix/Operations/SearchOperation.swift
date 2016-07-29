@@ -16,7 +16,7 @@ class SearchOperation: GroupOperation {
     
     init(searchTerm: String, completionHandler: ([SearchResult]?) -> Void) {
         self.completionHandler = completionHandler
-        super.init(operations: [NSOperation]())
+        super.init(operations: [Operation]())
         
         let sortOperation = SortSearchResultsOperation { (results) in
             self.results = results
@@ -27,7 +27,7 @@ class SearchOperation: GroupOperation {
             guard let book = Book.fetch(id, context: managedObjectContext) else {continue}
             guard book.includeInSearch else {continue}
             let operation = SingleBookSearchOperation(zimReader: zimReader,
-                                                      lowerCaseSearchTerm: searchTerm.lowercaseString,
+                                                      lowerCaseSearchTerm: searchTerm.lowercased(),
                                                       completionHandler: { [unowned sortOperation] (results) in
                 sortOperation.results += results
             })
@@ -41,9 +41,9 @@ class SearchOperation: GroupOperation {
         addCondition(MutuallyExclusive<ZimMultiReader>())
     }
     
-    override func finished(errors: [NSError]) {
+    override func finished(_ errors: [NSError]) {
         //print("Search Operation finished, status \(cancelled ? "Canceled" : "Not Canceled"), \(NSDate().timeIntervalSinceDate(startTime))")
-        NSOperationQueue.mainQueue().addOperationWithBlock {
+        OperationQueue.main.addOperationWithBlock {
             self.completionHandler(self.cancelled ? nil : self.results)
         }
     }
@@ -62,7 +62,7 @@ private class SingleBookSearchOperation: Operation {
     
     override private func execute() {
         var results = [String: SearchResult]()
-        let indexedDics = zimReader.searchUsingIndex(lowerCaseSearchTerm) as? [[String: AnyObject]] ?? [[String: AnyObject]]()
+        let indexedDics = zimReader.search(usingIndex: lowerCaseSearchTerm) as? [[String: AnyObject]] ?? [[String: AnyObject]]()
         let titleDics = zimReader.searchSuggestionsSmart(lowerCaseSearchTerm) as? [[String: AnyObject]] ?? [[String: AnyObject]]()
         let mixedDics = titleDics + indexedDics // It is important we process the title search result first, so that we always keep the indexed search result
         for dic in mixedDics {
@@ -89,7 +89,7 @@ private class SortSearchResultsOperation: Operation {
     }
     
     private func sort() {
-        results.sortInPlace { (result0, result1) -> Bool in
+        results.sort { (result0, result1) -> Bool in
             if result0.score != result1.score {
                 return result0.score < result1.score
             } else {
@@ -102,8 +102,8 @@ private class SortSearchResultsOperation: Operation {
     
     // MARK: - Utilities
     
-    private func titleCaseInsensitiveCompare(result0: SearchResult, result1: SearchResult) -> Bool {
-        return result0.title.caseInsensitiveCompare(result1.title) == NSComparisonResult.OrderedAscending
+    private func titleCaseInsensitiveCompare(_ result0: SearchResult, result1: SearchResult) -> Bool {
+        return result0.title.caseInsensitiveCompare(result1.title) == ComparisonResult.orderedAscending
     }
 }
 

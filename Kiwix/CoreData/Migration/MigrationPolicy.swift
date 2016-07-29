@@ -9,7 +9,7 @@
 import CoreData
 
 class MigrationPolicy1_5: NSEntityMigrationPolicy {
-    func negateBool(bool: NSNumber) -> NSNumber {
+    func negateBool(_ bool: NSNumber) -> NSNumber {
         let bool = bool.boolValue
         return !bool
     }

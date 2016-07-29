@@ -30,13 +30,13 @@ class BasicBookCell: UITableViewCell {
     
     var hasPic: Bool = false {
         didSet {
-            hasPicIndicator.backgroundColor = hasPic ? hasPicIndicatorOrange : UIColor.lightGrayColor()
+            hasPicIndicator.backgroundColor = hasPic ? hasPicIndicatorOrange : UIColor.lightGray()
         }
     }
     
     var hasIndex: Bool = false {
         didSet {
-            hasIndexIndicator.backgroundColor = hasIndex ? hasIndexIndicatorBlue : UIColor.lightGrayColor()
+            hasIndexIndicator.backgroundColor = hasIndex ? hasIndexIndicatorBlue : UIColor.lightGray()
         }
     }
 }
@@ -54,7 +54,7 @@ class CheckMarkBookCell: BasicBookCell {
     
     var isChecked: Bool = false {
         didSet {
-            accessoryImageView.highlighted = isChecked
+            accessoryImageView.isHighlighted = isChecked
         }
     }
     
@@ -100,8 +100,8 @@ class BookTableCell: UITableViewCell {
     var accessoryImageTintColor: UIColor? {
         didSet {
             guard let imageRenderingMode = accessoryImageView.image?.renderingMode else {return}
-            if imageRenderingMode != .AlwaysTemplate {
-                accessoryImageView.image = accessoryImageView.image?.imageWithRenderingMode(.AlwaysTemplate)
+            if imageRenderingMode != .alwaysTemplate {
+                accessoryImageView.image = accessoryImageView.image?.withRenderingMode(.alwaysTemplate)
             }
             accessoryImageView.tintColor = accessoryImageTintColor
         }
@@ -110,8 +110,8 @@ class BookTableCell: UITableViewCell {
     var accessoryHighlightedImageTintColor: UIColor? {
         didSet {
             guard let imageRenderingMode = accessoryImageView.highlightedImage?.renderingMode else {return}
-            if imageRenderingMode != .AlwaysTemplate {
-                accessoryImageView.highlightedImage = accessoryImageView.highlightedImage?.imageWithRenderingMode(.AlwaysTemplate)
+            if imageRenderingMode != .alwaysTemplate {
+                accessoryImageView.highlightedImage = accessoryImageView.highlightedImage?.withRenderingMode(.alwaysTemplate)
             }
             accessoryImageView.tintColor = accessoryHighlightedImageTintColor
         }
@@ -129,10 +129,10 @@ class BookTableCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         favIcon.image = nil
-        hasPicIndicator.backgroundColor = UIColor.lightGrayColor()
+        hasPicIndicator.backgroundColor = UIColor.lightGray()
         titleLabel.text = nil
         subtitleLabel.text = nil
-        accessoryImageView.highlighted = false
+        accessoryImageView.isHighlighted = false
     }
 }
 
@@ -168,5 +168,5 @@ class BookmarkSnippetCell: BookmarkCell {
 // MARK: - Protocol
 
 protocol TableCellDelegate: class {
-    func didTapOnAccessoryViewForCell(cell: UITableViewCell)
+    func didTapOnAccessoryViewForCell(_ cell: UITableViewCell)
 }

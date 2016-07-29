@@ -15,18 +15,18 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
     
     // MARK: - LPTBarButtonItemDelegate
     
-    func barButtonTapped(sender: LPTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
+    func barButtonTapped(_ sender: LPTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
         guard sender == bookmarkButton else {return}
         showBookmarkTBVC()
     }
     
-    func barButtonLongPressedStart(sender: LPTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
+    func barButtonLongPressedStart(_ sender: LPTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
         guard sender == bookmarkButton else {return}
-        guard !webView.hidden else {return}
+        guard !webView.isHidden else {return}
         guard let article = article else {return}
         
         article.isBookmarked = !article.isBookmarked
-        if article.isBookmarked {article.bookmarkDate = NSDate()}
+        if article.isBookmarked {article.bookmarkDate = Date()}
         if article.snippet == nil {article.snippet = getSnippet(webView)}
         
         let operation = UpdateWidgetDataSourceOperation()
@@ -36,26 +36,26 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         bookmarkController = controller
         controller.bookmarkAdded = article.isBookmarked
         controller.transitioningDelegate = self
-        controller.modalPresentationStyle = .OverFullScreen
-        presentViewController(controller, animated: true, completion: nil)
+        controller.modalPresentationStyle = .overFullScreen
+        present(controller, animated: true, completion: nil)
         configureBookmarkButton()
     }
     
     // MARK: - UIViewControllerTransitioningDelegate
     
-    func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return BookmarkControllerAnimator(animateIn: true)
     }
     
-    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return BookmarkControllerAnimator(animateIn: false)
     }
     
     // MARK: - TableOfContentsDelegate
     
-    func scrollTo(heading: HTMLHeading) {
-        webView.stringByEvaluatingJavaScriptFromString(heading.scrollToJavaScript)
-        if traitCollection.horizontalSizeClass == .Compact {
+    func scrollTo(_ heading: HTMLHeading) {
+        webView.stringByEvaluatingJavaScript(from: heading.scrollToJavaScript)
+        if traitCollection.horizontalSizeClass == .compact {
             animateOutTableOfContentsController()
         }
     }
@@ -69,52 +69,52 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
     
     // MARK: - UISearchBarDelegate
     
-    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         showSearch(animated: true)
     }
     
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         hideSearch(animated: true)
         configureSearchBarPlaceHolder()
     }
 
-    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         searchController?.startSearch(searchText, delayed: true)
     }
     
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchController?.searchResultTBVC?.selectFirstResultIfPossible()
     }
     
     // MARK: -  UIPopoverPresentationControllerDelegate
     
-    func adaptivePresentationStyleForPresentationController(controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
-        return .None
+    func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
+        return .none
     }
     
     // MARK: - UIWebViewDelegate
     
-    func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        guard let url = request.URL else {return true}
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        guard let url = request.url else {return true}
         if url.scheme == "kiwix" {
             return true
         } else {
-            let svc = SFSafariViewController(URL: url)
+            let svc = SFSafariViewController(url: url)
             svc.delegate = self
-            presentViewController(svc, animated: true, completion: nil)
+            present(svc, animated: true, completion: nil)
             return false
         }
     }
     
-    func webViewDidStartLoad(webView: UIWebView) {
+    func webViewDidStartLoad(_ webView: UIWebView) {
         PacketAnalyzer.sharedInstance.startListening()
     }
     
-    func webViewDidFinishLoad(webView: UIWebView) {
-        guard let url = webView.request?.URL else {return}
-        guard url.scheme.caseInsensitiveCompare("Kiwix") == .OrderedSame else {return}
+    func webViewDidFinishLoad(_ webView: UIWebView) {
+        guard let url = webView.request?.url else {return}
+        guard url.scheme?.caseInsensitiveCompare("Kiwix") == .orderedSame else {return}
         
-        let title = webView.stringByEvaluatingJavaScriptFromString("document.title")
+        let title = webView.stringByEvaluatingJavaScript(from: "document.title")
         let managedObjectContext = UIApplication.appDelegate.managedObjectContext
         guard let bookID = url.host else {return}
         guard let book = Book.fetch(bookID, context: managedObjectContext) else {return}
@@ -131,7 +131,7 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         configureNavigationButtonTint()
         configureBookmarkButton()
         
-        if traitCollection.horizontalSizeClass == .Regular && isShowingTableOfContents {
+        if traitCollection.horizontalSizeClass == .regular && isShowingTableOfContents {
             tableOfContentsController?.headings = getTableOfContents(webView)
         }
         
@@ -142,14 +142,14 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
     
     func injectTableWrappingJavaScriptIfNeeded() {
         if Preference.webViewInjectJavascriptToAdjustPageLayout {
-            if traitCollection.horizontalSizeClass == .Compact {
-                guard let path = NSBundle.mainBundle().pathForResource("adjustlayoutiPhone", ofType: "js") else {return}
+            if traitCollection.horizontalSizeClass == .compact {
+                guard let path = Bundle.main.pathForResource("adjustlayoutiPhone", ofType: "js") else {return}
                 guard let jString = Utilities.contentOfFileAtPath(path) else {return}
-                webView.stringByEvaluatingJavaScriptFromString(jString)
+                webView.stringByEvaluatingJavaScript(from: jString)
             } else {
-                guard let path = NSBundle.mainBundle().pathForResource("adjustlayoutiPad", ofType: "js") else {return}
+                guard let path = Bundle.main.pathForResource("adjustlayoutiPad", ofType: "js") else {return}
                 guard let jString = Utilities.contentOfFileAtPath(path) else {return}
-                webView.stringByEvaluatingJavaScriptFromString(jString)
+                webView.stringByEvaluatingJavaScript(from: jString)
             }
         }
     }
@@ -158,12 +158,12 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         let zoomScale = Preference.webViewZoomScale
         guard zoomScale != 100.0 else {return}
         let jString = String(format: "document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust= '%.0f%%'", zoomScale)
-        webView.stringByEvaluatingJavaScriptFromString(jString)
+        webView.stringByEvaluatingJavaScript(from: jString)
     }
     
-    func getTableOfContents(webView: UIWebView) -> [HTMLHeading] {
-        guard let context = webView.valueForKeyPath("documentView.webView.mainFrame.javaScriptContext") as? JSContext,
-            let path = NSBundle.mainBundle().pathForResource("getTableOfContents", ofType: "js"),
+    func getTableOfContents(_ webView: UIWebView) -> [HTMLHeading] {
+        guard let context = webView.value(forKeyPath: "documentView.webView.mainFrame.javaScriptContext") as? JSContext,
+            let path = Bundle.main.pathForResource("getTableOfContents", ofType: "js"),
             let jString = Utilities.contentOfFileAtPath(path),
             let elements = context.evaluateScript(jString).toArray() as? [[String: String]] else {return [HTMLHeading]()}
         var headings = [HTMLHeading]()
@@ -174,9 +174,9 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         return headings
     }
     
-    func getSnippet(webView: UIWebView) -> String? {
-        guard let context = webView.valueForKeyPath("documentView.webView.mainFrame.javaScriptContext") as? JSContext,
-            let path = NSBundle.mainBundle().pathForResource("getSnippet", ofType: "js"),
+    func getSnippet(_ webView: UIWebView) -> String? {
+        guard let context = webView.value(forKeyPath: "documentView.webView.mainFrame.javaScriptContext") as? JSContext,
+            let path = Bundle.main.pathForResource("getSnippet", ofType: "js"),
             let jString = Utilities.contentOfFileAtPath(path),
             let snippet = context.evaluateScript(jString).toString() else {return nil}
         return snippet
@@ -184,13 +184,13 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
     
     // MARK: - UIPopoverPresentationControllerDelegate
     
-    func safariViewControllerDidFinish(controller: SFSafariViewController) {
-        controller.dismissViewControllerAnimated(true, completion: nil)
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        controller.dismiss(animated: true, completion: nil)
     }
     
     // MARK: - UIScrollViewDelegate
     
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard scrollView.contentSize.height >= scrollView.frame.height else {return}
         guard let navigationBar = navigationController?.navigationBar else {return}
         guard scrollView.contentOffset.y > 100 else {return}
@@ -209,13 +209,13 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         
         // Slide up nav bar
         let navOriginY = max(20.0 - 44.0, min(navigationBar.frame.origin.y + yDelta, 20.0))
-        let navFrame = CGRectMake(0, navOriginY, navigationBar.frame.width, navigationBar.frame.height)
+        let navFrame = CGRect(x: 0, y: navOriginY, width: navigationBar.frame.width, height: navigationBar.frame.height)
         navigationBar.frame = navFrame
         
         // Slide down tool bar
         if let toolBar = navigationController?.toolbar {
             let originY = max(view.frame.height - 44.0, min(toolBar.frame.origin.y - yDelta, view.frame.height))
-            let frame = CGRectMake(0, originY, toolBar.frame.width, toolBar.frame.height)
+            let frame = CGRect(x: 0, y: originY, width: toolBar.frame.width, height: toolBar.frame.height)
             toolBar.frame = frame
         }
         
@@ -229,7 +229,7 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         previousScrollViewYOffset = currentScrollViewYOffset
     }
     
-    func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         stoppedScrolling()
     }
     
@@ -247,22 +247,22 @@ extension MainController: LPTBarButtonItemDelegate, TableOfContentsDelegate, Zim
         animateBar(show)
     }
     
-    func animateBar(show: Bool) {
-        UIView.animateWithDuration(0.2) { () -> Void in
+    func animateBar(_ show: Bool) {
+        UIView.animate(withDuration: 0.2) { () -> Void in
             if show {
                 if let navBar = self.navigationController?.navigationBar {
-                    navBar.frame = CGRectMake(0, 20, navBar.frame.width, navBar.frame.height)
+                    navBar.frame = CGRect(x: 0, y: 20, width: navBar.frame.width, height: navBar.frame.height)
                 }
                 if let toolBar = self.navigationController?.toolbar {
-                    toolBar.frame = CGRectMake(0, self.view.frame.height - toolBar.frame.height, toolBar.frame.width, toolBar.frame.height)
+                    toolBar.frame = CGRect(x: 0, y: self.view.frame.height - toolBar.frame.height, width: toolBar.frame.width, height: toolBar.frame.height)
                 }
                 self.navigationItem.titleView?.alpha = 1.0
             } else {
                 if let navBar = self.navigationController?.navigationBar {
-                    navBar.frame = CGRectMake(0, 20 - 44, navBar.frame.width, navBar.frame.height)
+                    navBar.frame = CGRect(x: 0, y: 20 - 44, width: navBar.frame.width, height: navBar.frame.height)
                 }
                 if let toolBar = self.navigationController?.toolbar {
-                    toolBar.frame = CGRectMake(0, self.view.frame.height, toolBar.frame.width, toolBar.frame.height)
+                    toolBar.frame = CGRect(x: 0, y: self.view.frame.height, width: toolBar.frame.width, height: toolBar.frame.height)
                 }
                 self.navigationItem.titleView?.alpha = 0.0
             }
@@ -282,7 +282,7 @@ class HTMLHeading {
         self.id = rawValue["id"] ?? ""
         self.textContent = rawValue["textContent"] ?? ""
         self.tagName = tagName
-        self.level = Int(tagName.stringByReplacingOccurrencesOfString("H", withString: "")) ?? -1
+        self.level = Int(tagName.replacingOccurrences(of: "H", with: "")) ?? -1
         
         if id == "" {return nil}
         if tagName == "" {return nil}

@@ -20,19 +20,19 @@ struct ReachabilityCondition: OperationCondition {
     static let name = "Reachability"
     static let isMutuallyExclusive = false
     
-    let host: NSURL
+    let host: URL
     let allowCellular: Bool
     
-    init(host: NSURL, allowCellular: Bool = true) {
+    init(host: URL, allowCellular: Bool = true) {
         self.host = host
         self.allowCellular = allowCellular
     }
     
-    func dependencyForOperation(operation: Operation) -> NSOperation? {
+    func dependencyForOperation(_ operation: Operation) -> Operation? {
         return nil
     }
     
-    func evaluateForOperation(operation: Operation, completion: OperationConditionResult -> Void) {
+    func evaluateForOperation(_ operation: Operation, completion: (OperationConditionResult) -> Void) {
         ReachabilityController.requestReachability(host, allowCellular: allowCellular) { reachable in
             if reachable {
                 completion(.Satisfied)
@@ -52,16 +52,16 @@ struct ReachabilityCondition: OperationCondition {
 private class ReachabilityController {
     static var reachabilityRefs = [String: SCNetworkReachability]()
 
-    static let reachabilityQueue = dispatch_queue_create("Operations.Reachability", DISPATCH_QUEUE_SERIAL)
+    static let reachabilityQueue = DispatchQueue(label: "Operations.Reachability", attributes: DispatchQueueAttributes.serial)
     
-    static func requestReachability(url: NSURL?, allowCellular: Bool, completionHandler: (Bool) -> Void) {
+    static func requestReachability(_ url: URL?, allowCellular: Bool, completionHandler: (Bool) -> Void) {
         if let host = url?.host {
-            dispatch_async(reachabilityQueue) {
+            reachabilityQueue.async {
                 var ref = self.reachabilityRefs[host]
 
                 if ref == nil {
                     let hostString = host as NSString
-                    ref = SCNetworkReachabilityCreateWithName(nil, hostString.UTF8String)
+                    ref = SCNetworkReachabilityCreateWithName(nil, hostString.utf8String!)
                 }
                 
                 if let ref = ref {
@@ -75,7 +75,7 @@ private class ReachabilityController {
             }
         } else {
             // Test for general internet connectibility
-            dispatch_async(reachabilityQueue) {
+            reachabilityQueue.async {
                 var zeroAddress = sockaddr_in()
                 zeroAddress.sin_len = UInt8(sizeofValue(zeroAddress))
                 zeroAddress.sin_family = sa_family_t(AF_INET)
@@ -90,7 +90,7 @@ private class ReachabilityController {
         }
     }
     
-    static func getReachibility(ref: SCNetworkReachability, allowCellular: Bool) -> Bool {
+    static func getReachibility(_ ref: SCNetworkReachability, allowCellular: Bool) -> Bool {
         var reachable = false
         var flags: SCNetworkReachabilityFlags = []
         if SCNetworkReachabilityGetFlags(ref, &flags) != false {
@@ -101,9 +101,9 @@ private class ReachabilityController {
             */
             #if os(iOS) || os(watchOS) || os(tvOS)
                 if allowCellular {
-                    reachable = flags.contains(.Reachable)
+                    reachable = flags.contains(.reachable)
                 } else {
-                    reachable = flags.contains(.Reachable) && !flags.contains(.IsWWAN)
+                    reachable = flags.contains(.reachable) && !flags.contains(.isWWAN)
                 }
             #elseif os(OSX)
                 return flags.contains(.Reachable)

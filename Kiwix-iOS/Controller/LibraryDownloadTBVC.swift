@@ -26,28 +26,28 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         configureToolBar()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         segmentedControl.selectedSegmentIndex = 1
         Network.sharedInstance.delegate = self
         refreshProgress(animated: false)
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         Network.sharedInstance.delegate = nil
     }
     
     // MARK: - TableCellDelegate
     
-    func didTapOnAccessoryViewForCell(cell: UITableViewCell) {
-        guard let indexPath = tableView.indexPathForCell(cell),
-            let downloadTask = fetchedResultController.objectAtIndexPath(indexPath) as? DownloadTask,
+    func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell),
+            let downloadTask = fetchedResultController.object(at: indexPath) as? DownloadTask,
             let book = downloadTask.book else {return}
         switch downloadTask.state {
-        case .Downloading, .Queued:
+        case .downloading, .queued:
             Network.sharedInstance.pause(book)
-        case .Paused, .Error:
+        case .paused, .error:
             Network.sharedInstance.resume(book)
         }
     }
@@ -58,12 +58,12 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         refreshProgress(animated: true)
     }
     
-    private func refreshProgress(animated animated: Bool) {
+    private func refreshProgress(animated: Bool) {
         guard let downloadTasks = fetchedResultController.fetchedObjects as? [DownloadTask] else {return}
         for downloadTask in downloadTasks {
             guard let id = downloadTask.book?.id,
-                let indexPath = fetchedResultController.indexPathForObject(downloadTask),
-                let cell = tableView.cellForRowAtIndexPath(indexPath) as? DownloadBookCell,
+                let indexPath = fetchedResultController.indexPath(forObject: downloadTask),
+                let cell = tableView.cellForRow(at: indexPath) as? DownloadBookCell,
                 let progress = Network.sharedInstance.progresses[id] else {return}
             cell.progressView.setProgress(Float(progress.fractionCompleted), animated: animated)
             cell.subtitleLabel.text = progress.description
@@ -73,11 +73,11 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     // MARK: - ToolBar Button
     
     @IBOutlet weak var segmentedControl: UISegmentedControl!
-    @IBAction func segmentedControlValueChanged(sender: UISegmentedControl) {
+    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
         tabBarController?.selectedIndex = sender.selectedSegmentIndex
     }
-    @IBAction func dismissSelf(sender: UIBarButtonItem) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func dismissSelf(_ sender: UIBarButtonItem) {
+        dismiss(animated: true, completion: nil)
     }
     
     var messageButton = MessageBarButtonItem()
@@ -91,7 +91,7 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         configureMessage()
     }
     
-    func configureToolBarVisibility(animated animated: Bool) {
+    func configureToolBarVisibility(animated: Bool) {
         navigationController?.setToolbarHidden(fetchedResultController.fetchedObjects?.count == 0, animated: animated)
     }
     
@@ -104,73 +104,73 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(scrollView: UIScrollView!) -> UIImage! {
+    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "DownloadColor")
     }
     
-    func titleForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("No Download Task", comment: "Book Library, book downloader, no book center title")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(18.0),
-                          NSForegroundColorAttributeName: UIColor.darkGrayColor()]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
+                          NSForegroundColorAttributeName: UIColor.darkGray()]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func descriptionForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func descriptionForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("After starting a download task, minimize the app to continue the task in the background.", comment: "Book Library, book downloader, no book center description")
         let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .ByWordWrapping
-        style.alignment = .Center
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(14.0),
-                          NSForegroundColorAttributeName: UIColor.lightGrayColor(),
+        style.lineBreakMode = .byWordWrapping
+        style.alignment = .center
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14.0),
+                          NSForegroundColorAttributeName: UIColor.lightGray(),
                           NSParagraphStyleAttributeName: style]
-        return NSAttributedString(string: text, attributes: attributes)
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func buttonTitleForEmptyDataSet(scrollView: UIScrollView!, forState state: UIControlState) -> NSAttributedString! {
+    func buttonTitleForEmptyDataSet(_ scrollView: UIScrollView!, forState state: UIControlState) -> AttributedString! {
         let text = NSLocalizedString("Learn more", comment: "Book Library, book downloader, learn more button text")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(17.0), NSForegroundColorAttributeName: segmentedControl.tintColor]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: segmentedControl.tintColor]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func verticalOffsetForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return 0.0
     }
     
-    func spaceHeightForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
     
-    func emptyDataSetDidTapButton(scrollView: UIScrollView!) {
+    func emptyDataSetDidTapButton(_ scrollView: UIScrollView!) {
         let operation = ShowHelpPageOperation(type: .DownloaderLearnMore, presentationContext: self)
         GlobalOperationQueue.sharedInstance.addOperation(operation)
     }
     
     // MARK: - TableView Data Source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return fetchedResultController.sections?.count ?? 0
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let sectionInfo = fetchedResultController.sections?[section] else {return 0}
         return sectionInfo.numberOfObjects
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "Cell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
         self.configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        guard let downloadTask = fetchedResultController.objectAtIndexPath(indexPath) as? DownloadTask,
+    func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
+        guard let downloadTask = fetchedResultController.object(at: indexPath) as? DownloadTask,
               let book = downloadTask.book, let id = book.id,
               let cell = cell as? DownloadBookCell else {return}
         
         cell.titleLabel.text = book.title
-        cell.hasPicIndicator.backgroundColor = book.hasPic ? UIColor.havePicTintColor : UIColor.lightGrayColor()
-        cell.favIcon.image = UIImage(data: book.favIcon ?? NSData())
+        cell.hasPicIndicator.backgroundColor = book.hasPic ? UIColor.havePicTintColor : UIColor.lightGray()
+        cell.favIcon.image = UIImage(data: book.favIcon ?? Data())
         cell.dateLabel.text = book.dateFormatted
         cell.articleCountLabel.text = book.articleCountFormatted
         cell.delegate = self
@@ -179,65 +179,65 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         cell.progressView.progress = Float(progress.fractionCompleted)
         
         switch downloadTask.state {
-        case .Queued, .Downloading:
-            cell.accessoryImageView.highlighted = false
-            cell.accessoryImageTintColor = UIColor.orangeColor().colorWithAlphaComponent(0.75)
-        case .Paused, .Error:
-            cell.accessoryImageView.highlighted = true
-            cell.accessoryHighlightedImageTintColor = UIColor.greenColor().colorWithAlphaComponent(0.75)
+        case .queued, .downloading:
+            cell.accessoryImageView.isHighlighted = false
+            cell.accessoryImageTintColor = UIColor.orange().withAlphaComponent(0.75)
+        case .paused, .error:
+            cell.accessoryImageView.isHighlighted = true
+            cell.accessoryHighlightedImageTintColor = UIColor.green().withAlphaComponent(0.75)
         }
         cell.subtitleLabel.text = progress.description
     }
     
     // MARK: Other Data Source
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard tableView.numberOfSections > 1 else {return nil}
         guard let languageName = fetchedResultController.sections?[section].name else {return nil}
         return languageName
     }
     
-    override func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]? {
+    override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
         let sectionIndexTitles = fetchedResultController.sectionIndexTitles
         guard sectionIndexTitles.count > 2 else {return nil}
         return sectionIndexTitles
     }
     
-    override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int {
-        return fetchedResultController.sectionForSectionIndexTitle(title, atIndex: index)
+    override func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        return fetchedResultController.section(forSectionIndexTitle: title, at: index)
     }
     
     // MARK: - Table View Delegate
     
-    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         guard tableView.numberOfSections > 1 else {return 0.0}
         guard let headerText = self.tableView(tableView, titleForHeaderInSection: section) else {return 0.0}
         guard headerText != "" else {return 0.0}
         return 20.0
     }
     
-    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else {return}
-        header.textLabel?.font = UIFont.boldSystemFontOfSize(14)
+        header.textLabel?.font = UIFont.boldSystemFont(ofSize: 14)
     }
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {}
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {}
     
-    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let remove = UITableViewRowAction(style: .Destructive, title: LocalizedStrings.remove) { (action, indexPath) -> Void in
-            guard let downloadTask = self.fetchedResultController.objectAtIndexPath(indexPath) as? DownloadTask else {return}
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let remove = UITableViewRowAction(style: UITableViewRowActionStyle(), title: LocalizedStrings.remove) { (action, indexPath) -> Void in
+            guard let downloadTask = self.fetchedResultController.object(at: indexPath) as? DownloadTask else {return}
             let context = UIApplication.appDelegate.managedObjectContext
             if let book = downloadTask.book {
                 Network.sharedInstance.cancel(book)
                 FileManager.removeResumeData(book)
             }
-            context.performBlockAndWait({ () -> Void in
+            context.performAndWait({ () -> Void in
                 downloadTask.book?.isLocal = false
-                context.deleteObject(downloadTask)
+                context.delete(downloadTask)
             })
         }
         return [remove]
@@ -248,7 +248,7 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     let managedObjectContext = UIApplication.appDelegate.managedObjectContext
     lazy var fetchedResultController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "DownloadTask")
-        let creationTimeDescriptor = NSSortDescriptor(key: "creationTime", ascending: true)
+        let creationTimeDescriptor = SortDescriptor(key: "creationTime", ascending: true)
         fetchRequest.sortDescriptors = [creationTimeDescriptor]
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: nil, cacheName: "DownloadFRC")
@@ -259,40 +259,40 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     
     // MARK: - Fetched Result Controller Delegate
     
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
-        case .Insert:
-            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
-        case .Delete:
-            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
+        case .insert:
+            tableView.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+        case .delete:
+            tableView.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
         default:
             return
         }
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
-        case .Insert:
+        case .insert:
             guard let newIndexPath = newIndexPath else {return}
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
-        case .Delete:
+            tableView.insertRows(at: [newIndexPath], with: .fade)
+        case .delete:
             guard let indexPath = indexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        case .Update:
-            guard let indexPath = indexPath, let cell = tableView.cellForRowAtIndexPath(indexPath) else {return}
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        case .update:
+            guard let indexPath = indexPath, let cell = tableView.cellForRow(at: indexPath) else {return}
             configureCell(cell, atIndexPath: indexPath)
-        case .Move:
+        case .move:
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.insertRows(at: [newIndexPath], with: .fade)
         }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         configureToolBarVisibility(animated: true)
         configureMessage()

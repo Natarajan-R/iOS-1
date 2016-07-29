@@ -19,7 +19,7 @@ import Foundation
 #if os(iOS) || os(watchOS) || os(tvOS)
     extension UIApplication {
         class var appDelegate: AppDelegate {
-            return UIApplication.sharedApplication().delegate as! AppDelegate
+            return UIApplication.shared().delegate as! AppDelegate
         }
     }
 #elseif os(OSX)
@@ -32,25 +32,25 @@ import Foundation
 
 // MARK: - Model
 
-extension NSLocale {
+extension Locale {
     class var preferredLangCodes: [String] {
-        let preferredLangNames = self.preferredLanguages()
+        let preferredLangNames = self.preferredLanguages
         var preferredLangCodes = Set<String>()
         for lang in preferredLangNames {
-            guard let code = lang.componentsSeparatedByString("-").first else {continue}
-            preferredLangCodes.insert(NSLocale.canonicalLanguageIdentifierFromString(code))
+            guard let code = lang.components(separatedBy: "-").first else {continue}
+            preferredLangCodes.insert(Locale.canonicalLanguageIdentifier(from: code))
         }
         return Array(preferredLangCodes)
     }
 }
 
-extension NSBundle {
+extension Bundle {
     class var appShortVersion: String {
-        return (NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString") as? String) ?? ""
+        return (Bundle.main.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String) ?? ""
     }
     
     class var buildVersion: String {
-        return (NSBundle.mainBundle().objectForInfoDictionaryKey(kCFBundleVersionKey as String) as? String) ?? "Unknown"
+        return (Bundle.main.objectForInfoDictionaryKey(kCFBundleVersionKey as String) as? String) ?? "Unknown"
     }
 }
 

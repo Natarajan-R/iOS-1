@@ -30,7 +30,7 @@ class LanguageTBVC: UITableViewController, NSFetchedResultsControllerDelegate {
         configureToolBar()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         let hasChange = showLanguageSet != Set(showLanguages)
         guard hasChange else {return}
         guard let libraryOnlineTBVC = self.navigationController?.topViewController as? LibraryOnlineTBVC else {return}
@@ -38,7 +38,7 @@ class LanguageTBVC: UITableViewController, NSFetchedResultsControllerDelegate {
     }
     
     func configureToolBar() {
-        let spaceBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace)
+        let spaceBarButtonItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace)
         setToolbarItems([spaceBarButtonItem, messageBarButtonItem, spaceBarButtonItem], animated: false)
         messageBarButtonItem.text = messageLabelText
     }
@@ -59,14 +59,14 @@ class LanguageTBVC: UITableViewController, NSFetchedResultsControllerDelegate {
         }
     }
     
-    func sortByCountDesc(languages: [Language]) -> [Language] {
-        return languages.sort { (language1, language2) -> Bool in
+    func sortByCountDesc(_ languages: [Language]) -> [Language] {
+        return languages.sorted { (language1, language2) -> Bool in
             guard let count1 = language1.books?.count else {return false}
             guard let count2 = language2.books?.count else {return false}
             if count1 == count2 {
                 guard let name1 = language1.name else {return false}
                 guard let name2 = language2.name else {return false}
-                return name1.compare(name2) == .OrderedAscending
+                return name1.compare(name2) == .orderedAscending
             } else {
                 return count1 > count2
             }
@@ -75,27 +75,27 @@ class LanguageTBVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 2
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return section == 0 ? showLanguages.count : hideLanguages.count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        if indexPath.section == 0 {
-            cell.textLabel?.text = showLanguages[indexPath.row].name
-            cell.detailTextLabel?.text = showLanguages[indexPath.row].books?.count.description
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        if (indexPath as NSIndexPath).section == 0 {
+            cell.textLabel?.text = showLanguages[(indexPath as NSIndexPath).row].name
+            cell.detailTextLabel?.text = showLanguages[(indexPath as NSIndexPath).row].books?.count.description
         } else {
-            cell.textLabel?.text = hideLanguages[indexPath.row].name
-            cell.detailTextLabel?.text = hideLanguages[indexPath.row].books?.count.description
+            cell.textLabel?.text = hideLanguages[(indexPath as NSIndexPath).row].name
+            cell.detailTextLabel?.text = hideLanguages[(indexPath as NSIndexPath).row].books?.count.description
         }
         return cell
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if showLanguages.count == 0 {
             return section == 0 ? "" : NSLocalizedString("ALL", comment: "Language selection: table section title") + "       "
         } else {
@@ -105,43 +105,43 @@ class LanguageTBVC: UITableViewController, NSFetchedResultsControllerDelegate {
     
     // MARK: - Table view delegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        func animateUpdates(originalIndexPath: NSIndexPath, destinationIndexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        func animateUpdates(_ originalIndexPath: IndexPath, destinationIndexPath: IndexPath) {
             tableView.beginUpdates()
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-            tableView.insertRowsAtIndexPaths([destinationIndexPath], withRowAnimation: .Right)
-            tableView.headerViewForSection(0)?.textLabel?.text = self.tableView(tableView, titleForHeaderInSection: 0)
-            tableView.headerViewForSection(1)?.textLabel?.text = self.tableView(tableView, titleForHeaderInSection: 1)
+            tableView.deleteRows(at: [indexPath], with: .right)
+            tableView.insertRows(at: [destinationIndexPath], with: .right)
+            tableView.headerView(forSection: 0)?.textLabel?.text = self.tableView(tableView, titleForHeaderInSection: 0)
+            tableView.headerView(forSection: 1)?.textLabel?.text = self.tableView(tableView, titleForHeaderInSection: 1)
             tableView.endUpdates()
         }
         
-        if indexPath.section == 0 {
-            let language = showLanguages[indexPath.row]
+        if (indexPath as NSIndexPath).section == 0 {
+            let language = showLanguages[(indexPath as NSIndexPath).row]
             language.isDisplayed = false
             hideLanguages.append(language)
-            showLanguages.removeAtIndex(indexPath.row)
+            showLanguages.remove(at: (indexPath as NSIndexPath).row)
             hideLanguages = sortByCountDesc(hideLanguages)
             
-            guard let row = hideLanguages.indexOf(language) else {tableView.reloadData(); return}
-            let destinationIndexPath = NSIndexPath(forRow: row, inSection: 1)
+            guard let row = hideLanguages.index(of: language) else {tableView.reloadData(); return}
+            let destinationIndexPath = IndexPath(row: row, section: 1)
             animateUpdates(indexPath, destinationIndexPath: destinationIndexPath)
         } else {
-            let language = hideLanguages[indexPath.row]
+            let language = hideLanguages[(indexPath as NSIndexPath).row]
             language.isDisplayed = true
             showLanguages.append(language)
-            hideLanguages.removeAtIndex(indexPath.row)
+            hideLanguages.remove(at: (indexPath as NSIndexPath).row)
             showLanguages = sortByCountDesc(showLanguages)
             
-            guard let row = showLanguages.indexOf(language) else {tableView.reloadData(); return}
-            let destinationIndexPath = NSIndexPath(forRow: row, inSection: 0)
+            guard let row = showLanguages.index(of: language) else {tableView.reloadData(); return}
+            let destinationIndexPath = IndexPath(row: row, section: 0)
             animateUpdates(indexPath, destinationIndexPath: destinationIndexPath)
         }
         
         messageBarButtonItem.text = messageLabelText
     }
     
-    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        if showLanguages.count == 0 && section == 0 {return CGFloat.min}
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        if showLanguages.count == 0 && section == 0 {return CGFloat.leastNormalMagnitude}
         return tableView.sectionHeaderHeight
     }
 

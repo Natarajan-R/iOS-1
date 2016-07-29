@@ -16,41 +16,41 @@ class AdjustLayoutTBVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = LocalizedStrings.adjustLayout
-        adjustPageLayoutSwitch.addTarget(self, action: #selector(AdjustLayoutTBVC.switcherValueChanged(_:)), forControlEvents: .ValueChanged)
-        adjustPageLayoutSwitch.on = adjustPageLayout
+        adjustPageLayoutSwitch.addTarget(self, action: #selector(AdjustLayoutTBVC.switcherValueChanged(_:)), for: .valueChanged)
+        adjustPageLayoutSwitch.isOn = adjustPageLayout
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         Preference.webViewInjectJavascriptToAdjustPageLayout = adjustPageLayout
     }
     
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = LocalizedStrings.adjustLayout
         cell.accessoryView = adjustPageLayoutSwitch
         return cell
     }
     
-    override func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         return LocalizedStrings.adjustPageLayoutMessage
     }
     
     // MARK: - Actions
     
-    func switcherValueChanged(switcher: UISwitch) {
+    func switcherValueChanged(_ switcher: UISwitch) {
         if switcher == adjustPageLayoutSwitch {
-            adjustPageLayout = switcher.on
+            adjustPageLayout = switcher.isOn
         }
     }
 

@@ -14,7 +14,7 @@ import DateTools
 class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelegate, TableCellDelegate, LTBarButtonItemDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate {
     
     var booksShowingDetail = Set<Book>()
-    var messsageLabelRefreshTimer: NSTimer?
+    var messsageLabelRefreshTimer: Foundation.Timer?
     var refreshing = false
     
     // MARK: - Override
@@ -31,14 +31,14 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         configureToolBar()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         startRefresh(invokedAutomatically: true)
         segmentedControl.selectedSegmentIndex = 0
-        messsageLabelRefreshTimer = NSTimer.scheduledTimerWithTimeInterval(60.0, target: self, selector: #selector(configureMessage), userInfo: nil, repeats: true)
+        messsageLabelRefreshTimer = Foundation.Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(configureMessage), userInfo: nil, repeats: true)
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         messsageLabelRefreshTimer?.invalidate()
     }
@@ -46,16 +46,16 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     
     // MARK: - TableCellDelegate
     
-    func didTapOnAccessoryViewForCell(cell: UITableViewCell) {
-        guard let indexPath = tableView.indexPathForCell(cell),
-              let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book else {return}
+    func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell),
+              let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         switch book.spaceState {
-        case .Enough:
+        case .enough:
             Network.sharedInstance.download(book)
-        case .Caution:
+        case .caution:
             // TODO: - Switch to a global op queue
             Network.sharedInstance.operationQueue.addOperation(SpaceCautionAlert(book: book, presentationContext: self))
-        case .NotEnough:
+        case .notEnough:
             // TODO: - Switch to a global op queue
             Network.sharedInstance.operationQueue.addOperation(SpaceNotEnoughAlert(book: book, presentationContext: self))
         }
@@ -63,7 +63,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     
     // MARK: - LTBarButtonItemDelegate
     
-    func barButtonTapped(sender: LTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
+    func barButtonTapped(_ sender: LTBarButtonItem, gestureRecognizer: UIGestureRecognizer) {
         guard sender === refreshLibButton else {return}
         startRefresh(invokedAutomatically: false)
     }
@@ -75,7 +75,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         startRefresh(invokedAutomatically: true)
     }
     
-    func startRefresh(invokedAutomatically invokedAutomatically: Bool) {
+    func startRefresh(invokedAutomatically: Bool) {
         if invokedAutomatically {
             let libraryIsOld: Bool = {
                 guard let lastLibraryRefreshTime = Preference.libraryLastRefreshTime else {return true}
@@ -86,7 +86,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         
         let refreshOperation = RefreshLibraryOperation(invokedAutomatically: invokedAutomatically) { (errors) in
             defer {
-                NSOperationQueue.mainQueue().addOperationWithBlock({
+                OperationQueue.main.addOperation({
                     self.refreshing = false
                     self.configureMessage()
                     self.configureRotatingStatus()
@@ -95,7 +95,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
             }
             if errors.count > 0 {
                 let codes = errors.map() {$0.code}
-                if codes.contains(OperationErrorCode.NetworkError.rawValue) {
+                if codes.contains(OperationErrorCode.networkError.rawValue) {
                     let alertOperation = RefreshLibraryInternetRequiredAlert(presentationContext: self)
                     GlobalOperationQueue.sharedInstance.addOperation(alertOperation)
                 }
@@ -116,11 +116,11 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     // MARK: - ToolBar Button
     
     @IBOutlet weak var segmentedControl: UISegmentedControl!
-    @IBAction func segmentedControlValueChanged(sender: UISegmentedControl) {
+    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
         tabBarController?.selectedIndex = sender.selectedSegmentIndex
     }
-    @IBAction func dismissSelf(sender: UIBarButtonItem) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func dismissSelf(_ sender: UIBarButtonItem) {
+        dismiss(animated: true, completion: nil)
     }
     
     lazy var refreshLibButton: LTBarButtonItem = LTBarButtonItem(configure: BarButtonConfig(imageName: "Refresh", delegate: self))
@@ -131,9 +131,9 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         toolBarItems[0] = refreshLibButton
         toolBarItems[2] = messageButton
         
-        let negativeSpace = UIBarButtonItem(barButtonSystemItem: .FixedSpace)
+        let negativeSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace)
         negativeSpace.width = -10
-        toolBarItems.insert(negativeSpace, atIndex: 0)
+        toolBarItems.insert(negativeSpace, at: 0)
         setToolbarItems(toolBarItems, animated: false)
         
         configureToolBarVisibility(animated: false)
@@ -151,7 +151,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
             guard let lastRefreshTime = Preference.libraryLastRefreshTime else {messageButton.text = localizedBookCountString; return}
             let localizedRefreshTimeString: String = {
                 var string = NSLocalizedString("Last Refresh: ", comment: "Book Library, online book catalogue refresh time")
-                if NSDate().timeIntervalSinceDate(lastRefreshTime) > 60.0 {
+                if Date().timeIntervalSince(lastRefreshTime as Date) > 60.0 {
                     string += lastRefreshTime.timeAgoSinceNow()
                 } else {
                     string += NSLocalizedString("just now", comment: "Book Library, online book catalogue refresh time")
@@ -162,7 +162,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         }
     }
     
-    func configureToolBarVisibility(animated animated: Bool) {
+    func configureToolBarVisibility(animated: Bool) {
         navigationController?.setToolbarHidden(fetchedResultController.fetchedObjects?.count == 0, animated: animated)
     }
     
@@ -176,130 +176,130 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     
     // MARK: - Empty table datasource & delegate
     
-    func imageForEmptyDataSet(scrollView: UIScrollView!) -> UIImage! {
+    func imageForEmptyDataSet(_ scrollView: UIScrollView!) -> UIImage! {
         return UIImage(named: "CloudColor")
     }
     
-    func titleForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func titleForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("There are some books in the cloud", comment: "Book Library, book online catalogue, no book center title")
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(18.0),
-                          NSForegroundColorAttributeName: UIColor.darkGrayColor()]
-        return NSAttributedString(string: text, attributes: attributes)
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 18.0),
+                          NSForegroundColorAttributeName: UIColor.darkGray()]
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func descriptionForEmptyDataSet(scrollView: UIScrollView!) -> NSAttributedString! {
+    func descriptionForEmptyDataSet(_ scrollView: UIScrollView!) -> AttributedString! {
         let text = NSLocalizedString("Refresh the library to show all books available for download.", comment: "Book Library, book online catalogue, no book center description")
         let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .ByWordWrapping
-        style.alignment = .Center
-        let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(14.0),
-                          NSForegroundColorAttributeName: UIColor.lightGrayColor(),
+        style.lineBreakMode = .byWordWrapping
+        style.alignment = .center
+        let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14.0),
+                          NSForegroundColorAttributeName: UIColor.lightGray(),
                           NSParagraphStyleAttributeName: style]
-        return NSAttributedString(string: text, attributes: attributes)
+        return AttributedString(string: text, attributes: attributes)
     }
     
-    func buttonTitleForEmptyDataSet(scrollView: UIScrollView!, forState state: UIControlState) -> NSAttributedString! {
+    func buttonTitleForEmptyDataSet(_ scrollView: UIScrollView!, forState state: UIControlState) -> AttributedString! {
         if refreshing == true {
             let text = NSLocalizedString("Refreshing...", comment: "Book Library, book downloader, refreshing button text")
-            let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(17.0), NSForegroundColorAttributeName: UIColor.darkGrayColor()]
-            return NSAttributedString(string: text, attributes: attributes)
+            let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: UIColor.darkGray()]
+            return AttributedString(string: text, attributes: attributes)
         } else {
             let text = NSLocalizedString("Refresh Now", comment: "Book Library, book downloader, refresh now button text")
-            let attributes = [NSFontAttributeName: UIFont.boldSystemFontOfSize(17.0), NSForegroundColorAttributeName: segmentedControl.tintColor]
-            return NSAttributedString(string: text, attributes: attributes)
+            let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17.0), NSForegroundColorAttributeName: segmentedControl.tintColor]
+            return AttributedString(string: text, attributes: attributes)
         }
     }
     
-    func verticalOffsetForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func verticalOffsetForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return -64.0
     }
     
-    func spaceHeightForEmptyDataSet(scrollView: UIScrollView!) -> CGFloat {
+    func spaceHeightForEmptyDataSet(_ scrollView: UIScrollView!) -> CGFloat {
         return 30.0
     }
     
-    func emptyDataSetDidTapButton(scrollView: UIScrollView!) {
+    func emptyDataSetDidTapButton(_ scrollView: UIScrollView!) {
         guard !refreshing else {return}
         startRefresh(invokedAutomatically: false)
     }
     
     // MARK: - TableView Data Source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return fetchedResultController.sections?.count ?? 0
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return fetchedResultController.sections?[section].numberOfObjects ?? 0
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "Cell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
         self.configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        guard let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book else {return}
+    func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
+        guard let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         guard let cell = cell as? CloudBookCell else {return}
         
         cell.titleLabel.text = book.title
-        cell.hasPicIndicator.backgroundColor = book.hasPic ? UIColor.havePicTintColor : UIColor.lightGrayColor()
-        cell.favIcon.image = UIImage(data: book.favIcon ?? NSData())
+        cell.hasPicIndicator.backgroundColor = book.hasPic ? UIColor.havePicTintColor : UIColor.lightGray()
+        cell.favIcon.image = UIImage(data: book.favIcon ?? Data())
         cell.delegate = self
         cell.subtitleLabel.text = booksShowingDetail.contains(book) ? book.detailedDescription2 : book.detailedDescription
         
         switch book.spaceState {
-        case .Enough:
-            cell.accessoryImageTintColor = UIColor.greenColor().colorWithAlphaComponent(0.75)
-        case .Caution:
-            cell.accessoryImageTintColor = UIColor.orangeColor().colorWithAlphaComponent(0.75)
-        case .NotEnough:
-            cell.accessoryImageTintColor = UIColor.grayColor().colorWithAlphaComponent(0.75)
+        case .enough:
+            cell.accessoryImageTintColor = UIColor.green().withAlphaComponent(0.75)
+        case .caution:
+            cell.accessoryImageTintColor = UIColor.orange().withAlphaComponent(0.75)
+        case .notEnough:
+            cell.accessoryImageTintColor = UIColor.gray().withAlphaComponent(0.75)
         }
     }
     
     // MARK: Other Data Source
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard tableView.numberOfSections > 1 else {return nil}
         guard let languageName = fetchedResultController.sections?[section].name else {return nil}
         return languageName
     }
     
-    override func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]? {
+    override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
         let sectionIndexTitles = fetchedResultController.sectionIndexTitles
         guard sectionIndexTitles.count > 2 else {return nil}
         return sectionIndexTitles
     }
     
-    override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int {
-        return fetchedResultController.sectionForSectionIndexTitle(title, atIndex: index)
+    override func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        return fetchedResultController.section(forSectionIndexTitle: title, at: index)
     }
     
     // MARK: - Table View Delegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        guard let book = fetchedResultController.objectAtIndexPath(indexPath) as? Book else {return}
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         if booksShowingDetail.contains(book) {
             booksShowingDetail.remove(book)
         } else {
             booksShowingDetail.insert(book)
         }
-        tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
     
-    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         guard tableView.numberOfSections > 1 else {return 0.0}
         guard let headerText = self.tableView(tableView, titleForHeaderInSection: section) else {return 0.0}
         guard headerText != "" else {return 0.0}
         return 20.0
     }
     
-    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else {return}
-        header.textLabel?.font = UIFont.boldSystemFontOfSize(14)
+        header.textLabel?.font = UIFont.boldSystemFont(ofSize: 14)
     }
     
     // MARK: - Fetched Results Controller
@@ -307,8 +307,8 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     let managedObjectContext = UIApplication.appDelegate.managedObjectContext
     lazy var fetchedResultController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Book")
-        let langDescriptor = NSSortDescriptor(key: "language.name", ascending: true)
-        let titleDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        let langDescriptor = SortDescriptor(key: "language.name", ascending: true)
+        let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [langDescriptor, titleDescriptor]
         fetchRequest.predicate = self.onlineCompoundPredicate
         
@@ -325,56 +325,56 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         configureMessage()
     }
     
-    private var langPredicate: NSPredicate {
+    private var langPredicate: Predicate {
         let displayedLanguages = Language.fetch(displayed: true, context: managedObjectContext)
         if displayedLanguages.count > 0 {
-            return NSPredicate(format: "language IN %@", displayedLanguages)
+            return Predicate(format: "language IN %@", displayedLanguages)
         } else {
-            return NSPredicate(format: "language.name != nil")
+            return Predicate(format: "language.name != nil")
         }
     }
     
-    private var onlineCompoundPredicate: NSCompoundPredicate {
-        let isCloudPredicate = NSPredicate(format: "isLocal == false")
-        return NSCompoundPredicate(andPredicateWithSubpredicates: [langPredicate, isCloudPredicate])
+    private var onlineCompoundPredicate: CompoundPredicate {
+        let isCloudPredicate = Predicate(format: "isLocal == false")
+        return CompoundPredicate(andPredicateWithSubpredicates: [langPredicate, isCloudPredicate])
     }
     
     // MARK: - Fetched Result Controller Delegate
     
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
-        case .Insert:
-            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
-        case .Delete:
-            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Fade)
+        case .insert:
+            tableView.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+        case .delete:
+            tableView.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
         default:
             return
         }
     }
     
-    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
-        case .Insert:
+        case .insert:
             guard let newIndexPath = newIndexPath else {return}
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
-        case .Delete:
+            tableView.insertRows(at: [newIndexPath], with: .fade)
+        case .delete:
             guard let indexPath = indexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        case .Update:
-            guard let indexPath = indexPath, let cell = tableView.cellForRowAtIndexPath(indexPath) else {return}
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        case .update:
+            guard let indexPath = indexPath, let cell = tableView.cellForRow(at: indexPath) else {return}
             configureCell(cell, atIndexPath: indexPath)
-        case .Move:
+        case .move:
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else {return}
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-            tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.insertRows(at: [newIndexPath], with: .fade)
         }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         configureToolBarVisibility(animated: true)
         configureMessage()

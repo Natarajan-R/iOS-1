@@ -18,25 +18,25 @@ struct NetworkObserver: OperationObserver {
 
     init() { }
     
-    func operationDidStart(operation: Operation) {
+    func operationDidStart(_ operation: Operation) {
         print("NetworkObserver: \(operation.name ?? "Unknown") operation did start")
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             // Increment the network indicator's "reference count"
             NetworkIndicatorController.sharedIndicatorController.networkActivityDidStart()
         }
     }
     
-    func operation(operation: Operation, didProduceOperation newOperation: NSOperation) { }
+    func operation(_ operation: Operation, didProduceOperation newOperation: Operation) { }
     
-    func operationDidFinish(operation: Operation, errors: [NSError]) {
+    func operationDidFinish(_ operation: Operation, errors: [NSError]) {
         print("NetworkObserver: \(operation.name ?? "Unknown") operation did finish")
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             // Decrement the network indicator's "reference count".
             NetworkIndicatorController.sharedIndicatorController.networkActivityDidEnd()
         }
     }
     
-    func operationDidCancel(operation: Operation) { }
+    func operationDidCancel(_ operation: Operation) { }
 }
 
 /// A singleton to manage a visual "reference count" on the network activity indicator.
@@ -52,7 +52,7 @@ private class NetworkIndicatorController {
     // MARK: Methods
     
     func networkActivityDidStart() {
-        assert(NSThread.isMainThread(), "Altering network activity indicator state can only be done on the main thread.")
+        assert(Thread.isMainThread, "Altering network activity indicator state can only be done on the main thread.")
 
         activityCount += 1
         
@@ -60,7 +60,7 @@ private class NetworkIndicatorController {
     }
     
     func networkActivityDidEnd() {
-        assert(NSThread.isMainThread(), "Altering network activity indicator state can only be done on the main thread.")
+        assert(Thread.isMainThread, "Altering network activity indicator state can only be done on the main thread.")
         
         activityCount -= 1
         
@@ -86,13 +86,13 @@ private class NetworkIndicatorController {
     private func showIndicator() {
         visibilityTimer?.cancel()
         visibilityTimer = nil
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+        UIApplication.shared().isNetworkActivityIndicatorVisible = true
     }
     
     private func hideIndicator() {
         visibilityTimer?.cancel()
         visibilityTimer = nil
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+        UIApplication.shared().isNetworkActivityIndicatorVisible = false
     }
 }
 
@@ -104,10 +104,10 @@ class Timer {
     
     // MARK: Initialization
 
-    init(interval: NSTimeInterval, handler: dispatch_block_t) {
-        let when = dispatch_time(DISPATCH_TIME_NOW, Int64(interval * Double(NSEC_PER_SEC)))
+    init(interval: TimeInterval, handler: ()->()) {
+        let when = DispatchTime.now() + Double(Int64(interval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
         
-        dispatch_after(when, dispatch_get_main_queue()) { [weak self] in
+        DispatchQueue.main.after(when: when) { [weak self] in
             if self?.isCancelled == false {
                 handler()
             }

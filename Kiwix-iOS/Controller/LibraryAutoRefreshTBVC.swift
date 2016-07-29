@@ -12,7 +12,7 @@ class LibraryAutoRefreshTBVC: UITableViewController {
     let sectionHeader = ["day", "week", "month"]
     let sectionHeaderLocalized = [LocalizedStrings.day, LocalizedStrings.week, LocalizedStrings.month]
     let enableAutoRefreshSwitch = UISwitch()
-    var checkedRowIndexPath: NSIndexPath?
+    var checkedRowIndexPath: IndexPath?
     var libraryAutoRefreshDisabled = Preference.libraryAutoRefreshDisabled
     var libraryRefreshInterval = Preference.libraryRefreshInterval
     let timeIntervals: [String: [Double]] = {
@@ -24,9 +24,9 @@ class LibraryAutoRefreshTBVC: UITableViewController {
         return timeIntervals
     }()
     
-    let dateComponentsFormatter: NSDateComponentsFormatter = {
-        let formatter = NSDateComponentsFormatter()
-        formatter.unitsStyle = NSDateComponentsFormatterUnitsStyle.Full
+    let dateComponentsFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = DateComponentsFormatter.UnitsStyle.full
         formatter.maximumUnitCount = 1
         return formatter
     }()
@@ -34,11 +34,11 @@ class LibraryAutoRefreshTBVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = LocalizedStrings.libraryAutoRefresh
-        enableAutoRefreshSwitch.addTarget(self, action: #selector(LibraryAutoRefreshTBVC.switcherValueChanged(_:)), forControlEvents: .ValueChanged)
-        enableAutoRefreshSwitch.on = !libraryAutoRefreshDisabled
+        enableAutoRefreshSwitch.addTarget(self, action: #selector(LibraryAutoRefreshTBVC.switcherValueChanged(_:)), for: .valueChanged)
+        enableAutoRefreshSwitch.isOn = !libraryAutoRefreshDisabled
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         Preference.libraryAutoRefreshDisabled = libraryAutoRefreshDisabled
         Preference.libraryRefreshInterval = libraryRefreshInterval
@@ -46,7 +46,7 @@ class LibraryAutoRefreshTBVC: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         if libraryAutoRefreshDisabled {
             return 1
         } else {
@@ -54,7 +54,7 @@ class LibraryAutoRefreshTBVC: UITableViewController {
         }
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 1
         } else {
@@ -63,27 +63,27 @@ class LibraryAutoRefreshTBVC: UITableViewController {
         }
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        if indexPath.section == 0 {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        if (indexPath as NSIndexPath).section == 0 {
             cell.textLabel?.text = LocalizedStrings.enableAutoRefresh
             cell.accessoryView = enableAutoRefreshSwitch
         } else {
-            let sectionHeader = self.sectionHeader[indexPath.section-1]
-            let interval = timeIntervals[sectionHeader]![indexPath.row]
-            cell.textLabel?.text = dateComponentsFormatter.stringFromTimeInterval(interval)
+            let sectionHeader = self.sectionHeader[(indexPath as NSIndexPath).section-1]
+            let interval = timeIntervals[sectionHeader]![(indexPath as NSIndexPath).row]
+            cell.textLabel?.text = dateComponentsFormatter.string(from: interval)
             if interval == libraryRefreshInterval {
-                cell.accessoryType = .Checkmark
+                cell.accessoryType = .checkmark
                 checkedRowIndexPath = indexPath
             } else {
-                cell.accessoryType = .None
+                cell.accessoryType = .none
             }
             cell.accessoryView = nil
         }
         return cell
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 {
             return LocalizedStrings.autoRefreshHelpMessage
         } else {
@@ -93,23 +93,23 @@ class LibraryAutoRefreshTBVC: UITableViewController {
     
     // MARK: - Table view delegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if indexPath.section >= 1 {
-            if let checkedRowIndexPath = checkedRowIndexPath, let cell = tableView.cellForRowAtIndexPath(checkedRowIndexPath) {
-                cell.accessoryType = .None
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if (indexPath as NSIndexPath).section >= 1 {
+            if let checkedRowIndexPath = checkedRowIndexPath, let cell = tableView.cellForRow(at: checkedRowIndexPath) {
+                cell.accessoryType = .none
             }
             
-            if let cell = tableView.cellForRowAtIndexPath(indexPath) {
-                cell.accessoryType = .Checkmark
+            if let cell = tableView.cellForRow(at: indexPath) {
+                cell.accessoryType = .checkmark
             }
             
             checkedRowIndexPath = indexPath
-            let sectionHeader = self.sectionHeader[indexPath.section-1]
-            libraryRefreshInterval = timeIntervals[sectionHeader]![indexPath.row]
+            let sectionHeader = self.sectionHeader[(indexPath as NSIndexPath).section-1]
+            libraryRefreshInterval = timeIntervals[sectionHeader]![(indexPath as NSIndexPath).row]
         }
     }
     
-    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         if section == 0 {
             if let view = view as? UITableViewHeaderFooterView {
                 view.textLabel?.text = LocalizedStrings.autoRefreshHelpMessage
@@ -119,12 +119,12 @@ class LibraryAutoRefreshTBVC: UITableViewController {
     
     // MARK: - Action
     
-    func switcherValueChanged(switcher: UISwitch) {
-        libraryAutoRefreshDisabled = !switcher.on
+    func switcherValueChanged(_ switcher: UISwitch) {
+        libraryAutoRefreshDisabled = !switcher.isOn
         if libraryAutoRefreshDisabled {
-            tableView.deleteSections(NSIndexSet(indexesInRange: NSMakeRange(1, sectionHeader.count-1)), withRowAnimation: UITableViewRowAnimation.Fade)
+            tableView.deleteSections(IndexSet(integersIn: NSMakeRange(1, sectionHeader.count-1).toRange()!), with: UITableViewRowAnimation.fade)
         } else {
-            tableView.insertSections(NSIndexSet(indexesInRange: NSMakeRange(1, sectionHeader.count-1)), withRowAnimation: .Fade)
+            tableView.insertSections(IndexSet(integersIn: NSMakeRange(1, sectionHeader.count-1).toRange()!), with: .fade)
         }
     }
 }

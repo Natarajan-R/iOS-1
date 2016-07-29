@@ -16,9 +16,9 @@ class SettingTBVC: UITableViewController {
                           [LocalizedStrings.bookmarks],
                           [LocalizedStrings.rateKiwix, LocalizedStrings.about]]
     
-    let dateComponentsFormatter: NSDateComponentsFormatter = {
-        let formatter = NSDateComponentsFormatter()
-        formatter.unitsStyle = NSDateComponentsFormatterUnitsStyle.Full
+    let dateComponentsFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = DateComponentsFormatter.UnitsStyle.full
         return formatter
     }()
     
@@ -28,17 +28,17 @@ class SettingTBVC: UITableViewController {
         clearsSelectionOnViewWillAppear = true
         showRateKiwixIfNeeded()
         
-        if UIApplication.buildStatus == .Alpha {
+        if UIApplication.buildStatus == .alpha {
             cellTextlabels[2].append("Boost Factor 🚀")
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "MiscAbout" {
             guard let controller = segue.destinationViewController as? WebViewController else {return}
             controller.page = .About
@@ -47,31 +47,31 @@ class SettingTBVC: UITableViewController {
     
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return sectionHeader.count
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return cellTextlabels[section].count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        cell.textLabel?.text = cellTextlabels[indexPath.section][indexPath.row]
+        cell.textLabel?.text = cellTextlabels[(indexPath as NSIndexPath).section][(indexPath as NSIndexPath).row]
         cell.detailTextLabel?.text = {
             switch indexPath {
-            case NSIndexPath(forRow: 0, inSection: 0):
+            case IndexPath(row: 0, section: 0):
                 return Preference.libraryAutoRefreshDisabled ? LocalizedStrings.disabled :
-                    dateComponentsFormatter.stringFromTimeInterval(Preference.libraryRefreshInterval)
-            case NSIndexPath(forRow: 1, inSection: 0):
+                    dateComponentsFormatter.string(from: Preference.libraryRefreshInterval)
+            case IndexPath(row: 1, section: 0):
                 return Preference.libraryRefreshAllowCellularData ? LocalizedStrings.on : LocalizedStrings.off
-            case NSIndexPath(forRow: 2, inSection: 0):
+            case IndexPath(row: 2, section: 0):
                 guard let skipBackup = FileManager.getSkipBackupAttribute(item: FileManager.docDirURL) else {return ""}
                 return skipBackup ? LocalizedStrings.off: LocalizedStrings.on
-            case NSIndexPath(forRow: 0, inSection: 1):
+            case IndexPath(row: 0, section: 1):
                 return String.formattedPercentString(Preference.webViewZoomScale / 100)
-            case NSIndexPath(forRow: 1, inSection: 1):
+            case IndexPath(row: 1, section: 1):
                 return Preference.webViewInjectJavascriptToAdjustPageLayout ? LocalizedStrings.on : LocalizedStrings.off
             default:
                 return nil
@@ -83,56 +83,56 @@ class SettingTBVC: UITableViewController {
     
     // MARK: - Table View Delegate
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return sectionHeader[section]
     }
     
-    override func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         guard section == tableView.numberOfSections - 1 else {return nil}
-        var footnote = String(format: LocalizedStrings.versionString, NSBundle.appShortVersion)
+        var footnote = String(format: LocalizedStrings.versionString, Bundle.appShortVersion)
         switch UIApplication.buildStatus {
-        case .Alpha, .Beta:
-            footnote += (UIApplication.buildStatus == .Alpha ? " Alpha" : " Beta")
+        case .alpha, .beta:
+            footnote += (UIApplication.buildStatus == .alpha ? " Alpha" : " Beta")
             footnote += "\n"
-            footnote += "Build " + NSBundle.buildVersion
+            footnote += "Build " + Bundle.buildVersion
             return footnote
-        case .Release:
+        case .release:
             return footnote
         }
     }
     
-    override func tableView(tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
+    override func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
         guard section == tableView.numberOfSections - 1 else {return}
         if let view = view as? UITableViewHeaderFooterView {
-            view.textLabel?.textAlignment = .Center
+            view.textLabel?.textAlignment = .center
         }
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        defer {tableView.deselectRowAtIndexPath(indexPath, animated: true)}
-        let cell = tableView.cellForRowAtIndexPath(indexPath)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        defer {tableView.deselectRow(at: indexPath, animated: true)}
+        let cell = tableView.cellForRow(at: indexPath)
         guard let text = cell?.textLabel?.text else {return}
         switch text {
         case LocalizedStrings.libraryAutoRefresh:
-            performSegueWithIdentifier("LibraryAutoRefresh", sender: self)
+            performSegue(withIdentifier: "LibraryAutoRefresh", sender: self)
         case LocalizedStrings.libraryUseCellularData:
-            performSegueWithIdentifier("LibraryUseCellularData", sender: self)
+            performSegue(withIdentifier: "LibraryUseCellularData", sender: self)
         case LocalizedStrings.libraryBackup:
-            performSegueWithIdentifier("LibraryBackup", sender: self)
+            performSegue(withIdentifier: "LibraryBackup", sender: self)
         case LocalizedStrings.fontSize:
-            performSegueWithIdentifier("ReadingFontSize", sender: self)
+            performSegue(withIdentifier: "ReadingFontSize", sender: self)
         case LocalizedStrings.adjustLayout:
-            performSegueWithIdentifier("AdjustLayout", sender: self)
+            performSegue(withIdentifier: "AdjustLayout", sender: self)
         case LocalizedStrings.history:
-            performSegueWithIdentifier("SearchHistory", sender: self)
+            performSegue(withIdentifier: "SearchHistory", sender: self)
         case LocalizedStrings.bookmarks:
-            performSegueWithIdentifier("SettingWidgetBookmarksTBVC", sender: self)
+            performSegue(withIdentifier: "SettingWidgetBookmarksTBVC", sender: self)
         case "Boost Factor 🚀":
-            performSegueWithIdentifier("SearchTune", sender: self)
+            performSegue(withIdentifier: "SearchTune", sender: self)
         case LocalizedStrings.rateKiwix:
             showRateKiwixAlert(showRemindLater: false)
         case LocalizedStrings.about:
-            performSegueWithIdentifier("MiscAbout", sender: self)
+            performSegue(withIdentifier: "MiscAbout", sender: self)
         default:
             break
         }
@@ -143,26 +143,26 @@ class SettingTBVC: UITableViewController {
     func showRateKiwixIfNeeded() {
         guard Preference.haveRateKiwix == false else {return}
         guard let firstActiveDate = Preference.activeUseHistory.first else {return}
-        let installtionIsOldEnough = NSDate().timeIntervalSinceDate(firstActiveDate) > 3600.0 * 24 * 7
+        let installtionIsOldEnough = Date().timeIntervalSince(firstActiveDate as Date) > 3600.0 * 24 * 7
         let hasActivelyUsed = Preference.activeUseHistory.count > 10
         if installtionIsOldEnough && hasActivelyUsed {
             showRateKiwixAlert(showRemindLater: true)
         }
     }
     
-    func showRateKiwixAlert(showRemindLater showRemindLater: Bool) {
-        let alert = UIAlertController(title: LocalizedStrings.rateKiwixTitle, message: LocalizedStrings.rateKiwixMessage, preferredStyle: .Alert)
-        let remindLater = UIAlertAction(title: LocalizedStrings.rateLater, style: .Default) { (action) -> Void in
+    func showRateKiwixAlert(showRemindLater: Bool) {
+        let alert = UIAlertController(title: LocalizedStrings.rateKiwixTitle, message: LocalizedStrings.rateKiwixMessage, preferredStyle: .alert)
+        let remindLater = UIAlertAction(title: LocalizedStrings.rateLater, style: .default) { (action) -> Void in
             Preference.activeUseHistory.removeAll()
         }
-        let remindNever = UIAlertAction(title: LocalizedStrings.rateNever, style: .Default) { (action) -> Void in
+        let remindNever = UIAlertAction(title: LocalizedStrings.rateNever, style: .default) { (action) -> Void in
             Preference.haveRateKiwix = true
         }
-        let rateNow = UIAlertAction(title: LocalizedStrings.rateNow, style: .Cancel) { (action) -> Void in
+        let rateNow = UIAlertAction(title: LocalizedStrings.rateNow, style: .cancel) { (action) -> Void in
             self.goRateInAppStore()
             Preference.haveRateKiwix = true
         }
-        let cancel = UIAlertAction(title: LocalizedStrings.cancel, style: .Default, handler: nil)
+        let cancel = UIAlertAction(title: LocalizedStrings.cancel, style: .default, handler: nil)
         
         if showRemindLater {
             alert.addAction(remindLater)
@@ -173,18 +173,18 @@ class SettingTBVC: UITableViewController {
             alert.addAction(cancel)
         }
         
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     
     func goRateInAppStore() {
-        let url = NSURL(string: "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=997079563&pageNumber=0&sortOrdering=2&type=Purple+Software&mt=8")!
-        UIApplication.sharedApplication().openURL(url)
+        let url = URL(string: "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=997079563&pageNumber=0&sortOrdering=2&type=Purple+Software&mt=8")!
+        UIApplication.shared().openURL(url)
     }
     
     // MARK: - Actions
     
-    @IBAction func dismissButtonTapped(sender: UIBarButtonItem) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func dismissButtonTapped(_ sender: UIBarButtonItem) {
+        self.dismiss(animated: true, completion: nil)
     }
 
 }

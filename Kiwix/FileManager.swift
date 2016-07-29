@@ -11,84 +11,84 @@ class FileManager {
     // MARK: - Path Utilities
     
     class var docDirPath: String {
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         return paths.first!
     }
     
-    class var docDirURL: NSURL {
-        return NSURL(fileURLWithPath: docDirPath, isDirectory: true)
+    class var docDirURL: URL {
+        return URL(fileURLWithPath: docDirPath, isDirectory: true)
     }
     
     class var libDirPath: String {
-        let paths = NSSearchPathForDirectoriesInDomains(.LibraryDirectory, .UserDomainMask, true)
+        let paths = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
         return paths.first!
     }
     
-    class var libDirURL: NSURL {
-        return NSURL(fileURLWithPath: libDirPath, isDirectory: true)
+    class var libDirURL: URL {
+        return URL(fileURLWithPath: libDirPath, isDirectory: true)
     }
     
     // MARK: - Move Book
     
-    class func move(book: Book, fromURL: NSURL, suggestedFileName: String?) {
+    class func move(_ book: Book, fromURL: URL, suggestedFileName: String?) {
         let fileName: String = {
             if let suggestedFileName = suggestedFileName {return suggestedFileName}
             if let id = book.id {return "\(id).zim"}
-            return NSDate().description + ".zim"
+            return Date().description + ".zim"
         }()
         let directory = docDirURL
         createDirectory(directory, includeInICloudBackup: false)
-        let destination = directory.URLByAppendingPathComponent(fileName)
+        let destination = try! directory.appendingPathComponent(fileName)
         moveOrReplaceFile(from: fromURL, to: destination)
     }
     
     // MARK: - Book Resume Data
     
-    private class func resumeDataURL(book: Book) -> NSURL {
-        let tempDownloadLocation = NSURL(fileURLWithPath: libDirPath).URLByAppendingPathComponent("DownloadTemp", isDirectory: true)
-        return tempDownloadLocation.URLByAppendingPathComponent(book.id ?? NSDate().description, isDirectory: false)
+    private class func resumeDataURL(_ book: Book) -> URL {
+        let tempDownloadLocation = try! URL(fileURLWithPath: libDirPath).appendingPathComponent("DownloadTemp", isDirectory: true)
+        return try! tempDownloadLocation.appendingPathComponent(book.id ?? Date().description, isDirectory: false)
     }
     
-    class func saveResumeData(data: NSData, book: Book) {
-        let tempDownloadLocation = NSURL(fileURLWithPath: libDirPath).URLByAppendingPathComponent("DownloadTemp", isDirectory: true)
-        if !NSFileManager.defaultManager().fileExistsAtPath(tempDownloadLocation.path!) {
+    class func saveResumeData(_ data: Data, book: Book) {
+        let tempDownloadLocation = try! URL(fileURLWithPath: libDirPath).appendingPathComponent("DownloadTemp", isDirectory: true)
+        if !Foundation.FileManager.default.fileExists(atPath: tempDownloadLocation.path!) {
             do {
-                try NSFileManager.defaultManager().createDirectoryAtURL(tempDownloadLocation, withIntermediateDirectories: true, attributes: [NSURLIsExcludedFromBackupKey: true])
+                try Foundation.FileManager.default.createDirectory(at: tempDownloadLocation, withIntermediateDirectories: true, attributes: [URLResourceKey.isExcludedFromBackupKey.rawValue: true])
             } catch let error as NSError {
                 print("Create temp download folder failed: \(error.localizedDescription)")
             }
         }
-        data.writeToURL(resumeDataURL(book), atomically: true)
+        try? data.write(to: resumeDataURL(book), options: [.dataWritingAtomic])
     }
     
-    class func readResumeData(book: Book) -> NSData? {
+    class func readResumeData(_ book: Book) -> Data? {
         guard let path = resumeDataURL(book).path else {return nil}
-        return NSFileManager.defaultManager().contentsAtPath(path)
+        return Foundation.FileManager.default.contents(atPath: path)
     }
     
-    class func removeResumeData(book: Book) {
-        if NSFileManager.defaultManager().fileExistsAtPath(resumeDataURL(book).path!) {
+    class func removeResumeData(_ book: Book) {
+        if Foundation.FileManager.default.fileExists(atPath: resumeDataURL(book).path!) {
             removeItem(atURL: resumeDataURL(book))
         }
     }
     
     // MARK: - Contents of Doc Folder
     
-    class var zimFileURLsInDocDir: [NSURL] {
-        return [NSURL]()
+    class var zimFileURLsInDocDir: [URL] {
+        return [URL]()
     }
     
     // MARK: - Item Operations
     
-    class func itemExistAtURL(url: NSURL) -> Bool {
+    class func itemExistAtURL(_ url: URL) -> Bool {
         guard let path = url.path else {return false}
-        return NSFileManager.defaultManager().fileExistsAtPath(path)
+        return Foundation.FileManager.default.fileExists(atPath: path)
     }
     
-    class func removeItem(atURL location: NSURL) -> Bool {
+    class func removeItem(atURL location: URL) -> Bool {
         var succeed = true
         do {
-            try NSFileManager.defaultManager().removeItemAtURL(location)
+            try Foundation.FileManager.default.removeItem(at: location)
         } catch let error as NSError {
             succeed = false
             print("Remove File failed: \(error.localizedDescription)")
@@ -96,15 +96,15 @@ class FileManager {
         return succeed
     }
     
-    class func moveOrReplaceFile(from fromURL: NSURL, to toURL: NSURL) -> Bool {
+    class func moveOrReplaceFile(from fromURL: URL, to toURL: URL) -> Bool {
         var succeed = true
         guard let path = toURL.path else {return false}
-        if NSFileManager.defaultManager().fileExistsAtPath(path) {
+        if Foundation.FileManager.default.fileExists(atPath: path) {
             succeed = removeItem(atURL: toURL)
         }
         
         do {
-            try NSFileManager.defaultManager().moveItemAtURL(fromURL, toURL: toURL)
+            try Foundation.FileManager.default.moveItem(at: fromURL, to: toURL)
         } catch let error as NSError {
             succeed = false
             print("Move File failed: \(error.localizedDescription)")
@@ -114,25 +114,25 @@ class FileManager {
     
     // MARK: - Dir Operations
     
-    class func createDirectory(url: NSURL, includeInICloudBackup: Bool) {
+    class func createDirectory(_ url: URL, includeInICloudBackup: Bool) {
         guard let path = url.path else {return}
         do {
-            try NSFileManager.defaultManager().createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: [NSURLIsExcludedFromBackupKey: true])
+            try Foundation.FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: [URLResourceKey.isExcludedFromBackupKey.rawValue: true])
         } catch let error as NSError {
             print("Create Directory failed: \(error.localizedDescription)")
         }
     }
     
-    class func contentsOfDirectory(url: NSURL) -> [NSURL] {
+    class func contentsOfDirectory(_ url: URL) -> [URL] {
         do {
-            return try NSFileManager.defaultManager().contentsOfDirectoryAtURL(url, includingPropertiesForKeys: nil, options: .SkipsSubdirectoryDescendants)
+            return try Foundation.FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .skipsSubdirectoryDescendants)
         } catch let error as NSError {
             print("Contents of Directory failed: \(error.localizedDescription)")
-            return [NSURL]()
+            return [URL]()
         }
     }
     
-    class func removeContentsOfDirectory(url: NSURL) {
+    class func removeContentsOfDirectory(_ url: URL) {
         for fileURL in contentsOfDirectory(url) {
             removeItem(atURL: fileURL)
         }
@@ -140,25 +140,25 @@ class FileManager {
     
     // MARK: - Backup Attribute
     
-    class func setSkipBackupAttribute(skipBackup: Bool, url: NSURL) {
+    class func setSkipBackupAttribute(_ skipBackup: Bool, url: URL) {
         guard let path = url.path else {return}
-        guard NSFileManager.defaultManager().fileExistsAtPath(path) else {return}
+        guard Foundation.FileManager.default.fileExists(atPath: path) else {return}
         
         do {
-            try url.setResourceValues([NSURLIsExcludedFromBackupKey: skipBackup])
+            try (url as NSURL).setResourceValues([URLResourceKey.isExcludedFromBackupKey: skipBackup])
         } catch let error as NSError {
             print("Set skip backup attribute for item \(url) failed, error: \(error.localizedDescription)")
         }
     }
     
-    class func getSkipBackupAttribute(item url: NSURL) -> Bool? {
+    class func getSkipBackupAttribute(item url: URL) -> Bool? {
         guard let path = url.path else {return nil}
-        guard NSFileManager.defaultManager().fileExistsAtPath(path) else {return nil}
+        guard Foundation.FileManager.default.fileExists(atPath: path) else {return nil}
         
         var skipBackup: AnyObject? = nil
         
         do {
-            try url.getResourceValue(&skipBackup, forKey: NSURLIsExcludedFromBackupKey)
+            try (url as NSURL).getResourceValue(&skipBackup, forKey: URLResourceKey.isExcludedFromBackupKey)
         } catch let error as NSError {
             print("Get skip backup attribute for item \(url) failed, error: \(error.localizedDescription)")
         }
