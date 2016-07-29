@@ -152,7 +152,7 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
             let localizedRefreshTimeString: String = {
                 var string = NSLocalizedString("Last Refresh: ", comment: "Book Library, online book catalogue refresh time")
                 if Date().timeIntervalSince(lastRefreshTime as Date) > 60.0 {
-                    guard let date = lastRefreshTime as NSDate else {return string}
+                    let date = lastRefreshTime as NSDate
                     string += date.timeAgoSinceNow()
                 } else {
                     string += NSLocalizedString("just now", comment: "Book Library, online book catalogue refresh time")
