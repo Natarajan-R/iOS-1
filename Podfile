@@ -7,9 +7,8 @@ platform :ios, '9.0'
 
 pod 'DateTools'
 pod 'DZNEmptyDataSet'
-pod 'SwiftyUserDefaults'
-pod 'PSOperations/Core', '~> 2.3'
-
+pod 'SwiftyUserDefaults', git: 'https://github.com/radex/SwiftyUserDefaults.git', branch: 'swift3'
+pod 'Operations', git: 'https://github.com/danthorpe/Operations.git', branch: 'swift/3.0'
 end
 
 target 'Kiwix-OSX' do
@@ -17,6 +16,6 @@ target 'Kiwix-OSX' do
 platform :osx, '10.10'
 
 pod 'DateTools'
-pod 'SwiftyUserDefaults'
+pod 'SwiftyUserDefaults', git: 'https://github.com/radex/SwiftyUserDefaults.git', branch: 'swift3'
 
 end

@@ -1,21 +1,39 @@
 PODS:
   - DateTools (1.7.0)
   - DZNEmptyDataSet (1.8)
-  - PSOperations/Core (2.3.0)
+  - Operations (3.0.0):
+    - Operations/Standard (= 3.0.0)
+  - Operations/Standard (3.0.0)
   - SwiftyUserDefaults (2.2.0)
 
 DEPENDENCIES:
   - DateTools
   - DZNEmptyDataSet
-  - PSOperations/Core (~> 2.3)
-  - SwiftyUserDefaults
+  - Operations (from `https://github.com/danthorpe/Operations.git`, branch `swift/3.0`)
+  - SwiftyUserDefaults (from `https://github.com/radex/SwiftyUserDefaults.git`, branch `swift3`)
+
+EXTERNAL SOURCES:
+  Operations:
+    :branch: swift/3.0
+    :git: https://github.com/danthorpe/Operations.git
+  SwiftyUserDefaults:
+    :branch: swift3
+    :git: https://github.com/radex/SwiftyUserDefaults.git
+
+CHECKOUT OPTIONS:
+  Operations:
+    :commit: ef497020507ee6164dc8920b30304e43db87e077
+    :git: https://github.com/danthorpe/Operations.git
+  SwiftyUserDefaults:
+    :commit: 086277b6d729c239eda3ca214c85698fceb4f86b
+    :git: https://github.com/radex/SwiftyUserDefaults.git
 
 SPEC CHECKSUMS:
   DateTools: 53288ee8b905fdc75897a1e6b5cc0144b14cba60
   DZNEmptyDataSet: d2351b2e8daefa40433ef292e246e21f6be31a7b
-  PSOperations: 81a4d50a4efe96f6d090dc0e7eb45d9fef79ff45
+  Operations: 1f01d6f1152223628e95304aca1eb28767db4fa2
   SwiftyUserDefaults: e7c8197a9d4068702e7f2406a968cae413b8de27
 
-PODFILE CHECKSUM: b9d1499b8e98a823777c72ddb35e782d499bac14
+PODFILE CHECKSUM: d1713f5f9fce411b351e7f45cb6ad2e4835cc87e
 
 COCOAPODS: 1.0.1
