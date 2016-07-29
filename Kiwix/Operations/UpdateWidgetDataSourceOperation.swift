@@ -10,7 +10,7 @@ import CoreData
 import Operations
 import NotificationCenter
 
-class UpdateWidgetDataSourceOperation: Operation {
+class UpdateWidgetDataSourceOperation: Procedure {
     let context: NSManagedObjectContext
     
     override init() {

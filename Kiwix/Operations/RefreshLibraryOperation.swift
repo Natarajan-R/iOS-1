@@ -16,7 +16,7 @@ class RefreshLibraryOperation: GroupOperation {
     init(invokedAutomatically: Bool, completionHandler: ((errors: [NSError]) -> Void)?) {
         super.init(operations: [])
         
-        name = String(RefreshLibraryOperation)
+        name = String(RefreshLibraryOperation.self)
         self.completionHandler = completionHandler
         
         // 1.Parse
@@ -25,7 +25,7 @@ class RefreshLibraryOperation: GroupOperation {
         // 0.Download library
         let url = URL(string: "http://www.kiwix.org/library.xml")!
         let task = URLSession.shared.dataTask(with: url) { [unowned parseOperation] (data, response, error) -> Void in
-            if let error = error {self.aggregateError(error)}
+            if let error = error {self.addFatalError(error)}
             parseOperation.xmlData = data
         }
         let fetchOperation = URLSessionTaskOperation(task: task)
@@ -45,12 +45,13 @@ class RefreshLibraryOperation: GroupOperation {
         parseOperation.addDependency(fetchOperation)
     }
     
-    override func finished(_ errors: [NSError]) {
-        completionHandler?(errors: errors)
+    override func operationDidFinish(_ errors: [ErrorProtocol]) {
+        let 🛠_passErrorsToCaller = 0
+        completionHandler?(errors: [NSError]())
     }
 }
 
-class ParseLibraryOperation: Operation, XMLParserDelegate {
+class ParseLibraryOperation: Procedure, XMLParserDelegate {
     var xmlData: Data?
     let context: NSManagedObjectContext
     
@@ -62,7 +63,7 @@ class ParseLibraryOperation: Operation, XMLParserDelegate {
         context.parent = NSManagedObjectContext.mainQueueContext
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         super.init()
-        name = String(ParseLibraryOperation)
+        name = String(ParseLibraryOperation.self)
     }
     
     override func execute() {
@@ -87,7 +88,7 @@ class ParseLibraryOperation: Operation, XMLParserDelegate {
         
         if !oldBookIDs.contains(id) {
             context.performAndWait({ () -> Void in
-                Book.add(attributeDict, context: self.context)
+                _ = Book.add(metadata: attributeDict, context: self.context)
             })
         }
         newBookIDs.insert(id)
@@ -129,23 +130,23 @@ class ParseLibraryOperation: Operation, XMLParserDelegate {
 }
 
 private struct AllowAutoRefreshCondition: OperationCondition {
-    static let name = "LibraryAllowAutoRefresh"
-    static let isMutuallyExclusive = false
+    let name = "LibraryAllowAutoRefresh"
+    let isMutuallyExclusive = false
     
     init() {}
     
-    func dependencyForOperation(_ operation: Operation) -> Operation? {
+    func dependencyForOperation(_ operation: Procedure) -> Operation? {
         return nil
     }
     
-    func evaluateForOperation(_ operation: Operation, completion: (OperationConditionResult) -> Void) {
+    func evaluateForOperation(_ operation: Procedure, completion: (OperationConditionResult) -> Void) {
         let allowAutoRefresh = !Preference.libraryAutoRefreshDisabled
         
         if allowAutoRefresh {
-            completion(.Satisfied)
+            completion(.satisfied)
         } else {
-            let error = NSError(code: .ConditionFailed, userInfo: [OperationConditionKey: self.dynamicType.name])
-            completion(.Failed(error))
+//            let error = NSError(code: .ConditionFailed, userInfo: [OperationConditionKey: self.dynamicType.name])
+            completion(.failed(OperationError.conditionFailed))
         }
     }
 }

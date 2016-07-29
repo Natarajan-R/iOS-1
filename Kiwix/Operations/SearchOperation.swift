@@ -41,15 +41,15 @@ class SearchOperation: GroupOperation {
         addCondition(MutuallyExclusive<ZimMultiReader>())
     }
     
-    override func finished(_ errors: [NSError]) {
+    override func operationDidFinish(_ errors: [ErrorProtocol]) {
         //print("Search Operation finished, status \(cancelled ? "Canceled" : "Not Canceled"), \(NSDate().timeIntervalSinceDate(startTime))")
-        OperationQueue.main.addOperationWithBlock {
-            self.completionHandler(self.cancelled ? nil : self.results)
+        OperationQueue.main.addOperation {
+            self.completionHandler(self.isCancelled ? nil : self.results)
         }
     }
 }
 
-private class SingleBookSearchOperation: Operation {
+private class SingleBookSearchOperation: Procedure {
     let zimReader: ZimReader
     let lowerCaseSearchTerm: String
     let completionHandler: ([SearchResult]) -> Void
@@ -58,6 +58,7 @@ private class SingleBookSearchOperation: Operation {
         self.zimReader = zimReader
         self.lowerCaseSearchTerm = lowerCaseSearchTerm
         self.completionHandler = completionHandler
+        super.init()
     }
     
     override private func execute() {
@@ -74,12 +75,13 @@ private class SingleBookSearchOperation: Operation {
     }
 }
 
-private class SortSearchResultsOperation: Operation {
+private class SortSearchResultsOperation: Procedure {
     let completionHandler: ([SearchResult]) -> Void
     var results = [SearchResult]()
     
     init(completionHandler: ([SearchResult]) -> Void) {
         self.completionHandler = completionHandler
+        super.init()
     }
     
     override private func execute() {

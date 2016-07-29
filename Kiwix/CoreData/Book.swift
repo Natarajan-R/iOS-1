@@ -18,7 +18,7 @@ class Book: NSManagedObject {
 
     // MARK: - Add Book
     
-    class func add(_ metadata: [String: AnyObject], context: NSManagedObjectContext) -> Book? {
+    class func add(metadata: [String: AnyObject], context: NSManagedObjectContext) -> Book? {
         guard let book = insert(Book.self, context: context) else {return nil}
         
         book.id = metadata["id"] as? String

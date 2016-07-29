@@ -8,7 +8,7 @@
 
 import Operations
 
-class GlobalOperationQueue: OperationQueue {
+class GlobalOperationQueue: ProcedureQueue {
     static let sharedInstance = GlobalOperationQueue()
 }
 

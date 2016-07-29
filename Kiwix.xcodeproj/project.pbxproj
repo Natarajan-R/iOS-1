@@ -162,7 +162,6 @@
 		9779987B1C1E1C9600B1DD5E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779987A1C1E1C9600B1DD5E /* Extensions.swift */; };
 		9779A1C81D34225E0071EFAB /* AlertOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C21D34225E0071EFAB /* AlertOperation.swift */; };
 		9779A1C91D34225E0071EFAB /* GlobalOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C31D34225E0071EFAB /* GlobalOperationQueue.swift */; };
-		9779A1CA1D34225E0071EFAB /* NetworkObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C41D34225E0071EFAB /* NetworkObserver.swift */; };
 		9779A1CB1D34225E0071EFAB /* RefreshLibraryOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C51D34225E0071EFAB /* RefreshLibraryOperation.swift */; };
 		9779A1CC1D34225E0071EFAB /* SearchOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C61D34225E0071EFAB /* SearchOperation.swift */; };
 		9779A1CD1D34225E0071EFAB /* UIOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9779A1C71D34225E0071EFAB /* UIOperations.swift */; };
@@ -1688,7 +1687,6 @@
 				970C3DCA1CBD79450026A240 /* MigrationPolicy.swift in Sources */,
 				97E891691CA976E90001CA32 /* FileManager.swift in Sources */,
 				97E60A061D10504000EBCB9D /* LibraryBackupTBVC.swift in Sources */,
-				9779A1CA1D34225E0071EFAB /* NetworkObserver.swift in Sources */,
 				971A105C1D022DAD007FC62C /* LibraryTabBarController.swift in Sources */,
 				971A10461D022CB2007FC62C /* SearchController.swift in Sources */,
 				9779987B1C1E1C9600B1DD5E /* Extensions.swift in Sources */,

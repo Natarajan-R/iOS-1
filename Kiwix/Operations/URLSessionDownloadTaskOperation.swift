@@ -8,46 +8,47 @@
 
 import Operations
 
-private var URLSessionTaskOperationKVOContext = 0
+private var URLSessionDownloadTaskOperationKVOContext = 0
 
-public class URLSessionDownloadTaskOperation: Operation {
+class URLSessionDownloadTaskOperation: Procedure {
     let task: URLSessionDownloadTask
     private var produceResumeData = false
     private var observerRemoved = false
     private let stateLock = Lock()
     
-    public init(downloadTask: URLSessionDownloadTask) {
+    init(downloadTask: URLSessionDownloadTask) {
         self.task = downloadTask
         super.init()
         
-        addObserver(BlockObserver(cancelHandler: { _ in
+        let observer = BlockObserver(willExecute: nil, willCancel: nil, didCancel: { (operation) in
             if self.produceResumeData {
-                downloadTask.cancelByProducingResumeData({ (data) in
+                self.task.cancel(byProducingResumeData: { (data) in
                 })
             } else {
-                downloadTask.cancel()
+                self.task.cancel()
             }
-        }))
+            }, didProduce: nil, willFinish: nil, didFinish: nil)
+        addObserver(observer)
     }
     
-    public func cancel(produceResumeData: Bool) {
+    func cancel(produceResumeData: Bool) {
         self.produceResumeData = produceResumeData
         cancel()
     }
     
-    override public func execute() {
+    override func execute() {
         guard task.state == .suspended || task.state == .running else {
             finish()
             return
         }
-        task.addObserver(self, forKeyPath: "state", options: NSKeyValueObservingOptions(), context: &URLSessionTaskOperationKVOContext)
+        task.addObserver(self, forKeyPath: "state", options: NSKeyValueObservingOptions(), context: &URLSessionDownloadTaskOperationKVOContext)
         if task.state == .suspended {
             task.resume()
         }
     }
     
-    override public func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-        guard context == &URLSessionTaskOperationKVOContext else { return }
+    override func observeValue(forKeyPath keyPath: String?, of object: AnyObject?, change: [NSKeyValueChangeKey : AnyObject]?, context: UnsafeMutablePointer<Void>?) {
+        guard context == &URLSessionDownloadTaskOperationKVOContext else { return }
         
         stateLock.withCriticalScope {
             if object === task && keyPath == "state" && !observerRemoved {

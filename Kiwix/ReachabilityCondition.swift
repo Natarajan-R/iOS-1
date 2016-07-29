@@ -16,9 +16,9 @@ import Operations
     Reachability is evaluated once when the operation to which this is attached is asked about its readiness.
 */
 struct ReachabilityCondition: OperationCondition {
-    static let hostKey = "Host"
-    static let name = "Reachability"
-    static let isMutuallyExclusive = false
+    let hostKey: String
+    let name = "Reachability"
+    let isMutuallyExclusive = false
     
     let host: URL
     let allowCellular: Bool
@@ -26,22 +26,22 @@ struct ReachabilityCondition: OperationCondition {
     init(host: URL, allowCellular: Bool = true) {
         self.host = host
         self.allowCellular = allowCellular
+        super.init()
     }
     
-    func dependencyForOperation(_ operation: Operation) -> Operation? {
+    func dependencyForOperation(_ operation: Procedure) -> Operation? {
         return nil
     }
     
-    func evaluateForOperation(_ operation: Operation, completion: (OperationConditionResult) -> Void) {
+    func evaluateForOperation(_ operation: Procedure, completion: (OperationConditionResult) -> Void) {
         ReachabilityController.requestReachability(host, allowCellular: allowCellular) { reachable in
             if reachable {
-                completion(.Satisfied)
+                completion(.satisfied)
             }
             else {
                 let userInfo = ["title": "Network Error",
                     "message": "Unable connecting to the internet. Please check your connection."]
-                let error = NSError(code: .ConditionFailed, userInfo: userInfo)
-                completion(.Failed(error))
+                completion(.failed(OperationError.conditionFailed))
             }
         }
     }

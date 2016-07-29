@@ -9,7 +9,7 @@
 import CoreData
 import Operations
 
-class ScanLocalBookOperation: Operation {
+class ScanLocalBookOperation: Procedure {
     private let context: NSManagedObjectContext
     private var firstBookAdded = false
     
@@ -54,7 +54,7 @@ class ScanLocalBookOperation: Operation {
         updateCoreData()
     }
     
-    override func finished(_ errors: [NSError]) {
+    override func operationDidFinish(_ errors: [ErrorProtocol]) {
         context.performAndWait {self.context.saveIfNeeded()}
         NSManagedObjectContext.mainQueueContext.performAndWait {NSManagedObjectContext.mainQueueContext.saveIfNeeded()}
         OperationQueue.main.addOperation { 
@@ -91,11 +91,11 @@ class ScanLocalBookOperation: Operation {
             guard let reader = ZimMultiReader.sharedInstance.readers[id] else {return}
             let book: Book? = {
                 let book = Book.fetch(id, context: NSManagedObjectContext.mainQueueContext)
-                return book ?? Book.add(reader.metaData, context: NSManagedObjectContext.mainQueueContext)
+                return book ?? Book.add(metadata: reader.metaData, context: NSManagedObjectContext.mainQueueContext)
             }()
             book?.isLocal = true
             book?.hasIndex = reader.hasIndex()
-            book?.hasPic = !reader.fileURL.absoluteString.contains("nopic")
+            book?.hasPic = !(reader.fileURL.absoluteString?.contains("nopic") ?? false)
         }
         
         for (id, book) in localBooks {

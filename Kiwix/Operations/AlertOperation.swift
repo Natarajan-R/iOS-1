@@ -9,7 +9,7 @@ This file shows how to present an alert as part of an operation.
 import UIKit
 import Operations
 
-class AlertOperation: Operation {
+class AlertOperation: Procedure {
     // MARK: Properties
 
     private let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .alert)

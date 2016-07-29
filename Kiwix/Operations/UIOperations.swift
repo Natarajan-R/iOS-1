@@ -86,7 +86,7 @@ class RefreshLibraryLanguageFilterAlert: AlertOperation {
         addAction(LocalizedStrings.cancel)
     }
     
-    override func finished(_ errors: [NSError]) {
+    override func operationWillFinish(_ errors: [ErrorProtocol]) {
         Preference.libraryHasShownPreferredLanguagePrompt = true
     }
     
@@ -128,13 +128,14 @@ class GetStartedAlert: AlertOperation {
 
 // MARK: - Help Pages
 
-class ShowHelpPageOperation: Operation {
+class ShowHelpPageOperation: Procedure {
     private let type: WebViewControllerContentType
     private weak var presentationContext: UIViewController?
     
     init(type: WebViewControllerContentType, presentationContext: UIViewController?) {
         self.type = type
         self.presentationContext = presentationContext
+        super.init()
     }
     
     override func execute() {

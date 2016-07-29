@@ -14,7 +14,7 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
     weak var delegate: DownloadProgressReporting?
     
     private let context = NSManagedObjectContext.mainQueueContext
-    let operationQueue = OperationQueue()
+    let queue = ProcedureQueue()
     
     var progresses = [String: DownloadProgress]()
     private var timer: Foundation.Timer?
@@ -30,7 +30,7 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
     
     override init() {
         super.init()
-        operationQueue.delegate = self
+        queue.delegate = self
     }
     
     func restoreProgresses() {
@@ -44,7 +44,7 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
                 let operation = URLSessionDownloadTaskOperation(downloadTask: task)
                 operation.name = task.taskDescription
                 operation.addObserver(NetworkObserver())
-                self.operationQueue.addOperation(operation)
+                self.queue.addOperation(operation)
             }
         }
     }
@@ -77,13 +77,13 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
     
     func pause(_ book: Book) {
         guard let id = book.id,
-            let operation = operationQueue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
+            let operation = queue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: true)
     }
     
     func cancel(_ book: Book) {
         guard let id = book.id,
-            let operation = operationQueue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
+            let operation = queue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: false)
     }
     
@@ -97,7 +97,7 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
         let operation = URLSessionDownloadTaskOperation(downloadTask: task)
         operation.name = id
         operation.addObserver(NetworkObserver())
-        operationQueue.addOperation(operation)
+        queue.addOperation(operation)
         
         let progress = DownloadProgress(book: book)
         progress.downloadStarted(task)

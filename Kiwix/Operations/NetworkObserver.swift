@@ -18,7 +18,7 @@ struct NetworkObserver: OperationObserver {
 
     init() { }
     
-    func operationDidStart(_ operation: Operation) {
+    func operationDidStart(_ operation: Procedure) {
         print("NetworkObserver: \(operation.name ?? "Unknown") operation did start")
         DispatchQueue.main.async {
             // Increment the network indicator's "reference count"
@@ -26,9 +26,9 @@ struct NetworkObserver: OperationObserver {
         }
     }
     
-    func operation(_ operation: Operation, didProduceOperation newOperation: Operation) { }
+    func operation(_ operation: Procedure, didProduceOperation newOperation: Procedure) { }
     
-    func operationDidFinish(_ operation: Operation, errors: [NSError]) {
+    func operationDidFinish(_ operation: Procedure, errors: [NSError]) {
         print("NetworkObserver: \(operation.name ?? "Unknown") operation did finish")
         DispatchQueue.main.async {
             // Decrement the network indicator's "reference count".
@@ -36,7 +36,10 @@ struct NetworkObserver: OperationObserver {
         }
     }
     
-    func operationDidCancel(_ operation: Operation) { }
+    func operationDidCancel(_ operation: Procedure) { }
+    
+    func willFinishOperation(_ operation: Procedure, errors: [ErrorProtocol]) {
+    }
 }
 
 /// A singleton to manage a visual "reference count" on the network activity indicator.
