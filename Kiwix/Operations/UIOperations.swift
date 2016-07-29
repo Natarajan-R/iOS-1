@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import PSOperations
+import Operations
 
 // MARK: - Alerts
 
