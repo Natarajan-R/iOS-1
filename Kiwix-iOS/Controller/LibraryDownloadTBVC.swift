@@ -41,9 +41,10 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     // MARK: - TableCellDelegate
     
     func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
-        guard let indexPath = tableView.indexPath(for: cell),
-            let downloadTask = fetchedResultController.object(at: indexPath) as? DownloadTask,
-            let book = downloadTask.book else {return}
+        guard let indexPath = tableView.indexPath(for: cell) else {return}
+        let downloadTask = fetchedResultController.object(at: indexPath)
+        guard let book = downloadTask.book else {return}
+        
         switch downloadTask.state {
         case .downloading, .queued:
             Network.sharedInstance.pause(book)
@@ -164,8 +165,8 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     }
     
     func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
-        guard let downloadTask = fetchedResultController.object(at: indexPath) as? DownloadTask,
-              let book = downloadTask.book, let id = book.id,
+        let downloadTask = fetchedResultController.object(at: indexPath)
+        guard let book = downloadTask.book, let id = book.id,
               let cell = cell as? DownloadBookCell else {return}
         
         cell.titleLabel.text = book.title
@@ -228,7 +229,7 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {}
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let remove = UITableViewRowAction(style: UITableViewRowActionStyle(), title: LocalizedStrings.remove) { (action, indexPath) -> Void in
+        let remove = UITableViewRowAction(style: .destructive, title: LocalizedStrings.remove) { (action, indexPath) -> Void in
             guard let downloadTask = self.fetchedResultController.object(at: indexPath) as? DownloadTask else {return}
             let context = UIApplication.appDelegate.managedObjectContext
             if let book = downloadTask.book {

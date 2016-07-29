@@ -47,8 +47,8 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     // MARK: - TableCellDelegate
     
     func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
-        guard let indexPath = tableView.indexPath(for: cell),
-              let book = fetchedResultController.object(at: indexPath) as? Book else {return}
+        guard let indexPath = tableView.indexPath(for: cell) else {return}
+        let book = fetchedResultController.object(at: indexPath)
         switch book.spaceState {
         case .enough:
             Network.sharedInstance.download(book)
@@ -152,7 +152,8 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
             let localizedRefreshTimeString: String = {
                 var string = NSLocalizedString("Last Refresh: ", comment: "Book Library, online book catalogue refresh time")
                 if Date().timeIntervalSince(lastRefreshTime as Date) > 60.0 {
-                    string += lastRefreshTime.timeAgoSinceNow()
+                    guard let date = lastRefreshTime as NSDate else {return string}
+                    string += date.timeAgoSinceNow()
                 } else {
                     string += NSLocalizedString("just now", comment: "Book Library, online book catalogue refresh time")
                 }

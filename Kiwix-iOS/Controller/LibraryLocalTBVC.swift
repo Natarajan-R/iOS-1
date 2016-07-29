@@ -35,8 +35,8 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
         guard segue.identifier == "showBookDetail" else {return}
         guard let controller = segue.destinationViewController as? LibraryLocalBookDetailTBVC,
               let cell = sender as? UITableViewCell,
-              let indexPath = tableView.indexPath(for: cell),
-              let book = fetchedResultController.object(at: indexPath) else {return}
+              let indexPath = tableView.indexPath(for: cell) else {return}
+        let book = fetchedResultController.object(at: indexPath)
         controller.book = book
     }
     
@@ -133,8 +133,8 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
     }
     
     func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
-        guard let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         guard let cell = cell as? BasicBookCell else {return}
+        let book = fetchedResultController.object(at: indexPath)
         
         cell.titleLabel.text = book.title
         cell.subtitleLabel.text = book.detailedDescription1
@@ -183,14 +183,14 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {}
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let delete = UITableViewRowAction(style: UITableViewRowActionStyle(), title: LocalizedStrings.delete) { (action, indexPath) -> Void in
-            guard let book = self.fetchedResultController.object(at: indexPath) as? Book else {return}
+        let delete = UITableViewRowAction(style: .destructive, title: LocalizedStrings.delete) { (action, indexPath) -> Void in
+            let book = self.fetchedResultController.object(at: indexPath)
             self.managedObjectContext.perform({ () -> Void in
                 if let id = book.id, let zimURL = ZimMultiReader.sharedInstance.readers[id]?.fileURL {
-                    FileManager.removeItem(atURL: zimURL)
+                    _ = FileManager.removeItem(atURL: zimURL)
                     
                     let indexFolderURL = try! zimURL.appendingPathExtension("idx")
-                    FileManager.removeItem(atURL: indexFolderURL)
+                    _ = FileManager.removeItem(atURL: indexFolderURL)
                 }
                 
                 if let _ = book.url {
