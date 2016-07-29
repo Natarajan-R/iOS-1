@@ -10,18 +10,8 @@ import Foundation
 import CoreData
 
 extension NSManagedObject {
-    class func fetch<T:NSManagedObject>(_ fetchRequest: NSFetchRequest<AnyObject>, type: T.Type, context: NSManagedObjectContext) -> [T]? {
-        do {
-            let matches = try context.fetch(fetchRequest) as? [T]
-            return matches
-        } catch let error as NSError {
-            print("Fetch failed: \(error.localizedDescription)")
-            return nil
-        }
-    }
-    
     class func insert<T:NSManagedObject>(_ type: T.Type, context: NSManagedObjectContext) -> T? {
-        let className = String(T)
+        let className = String(T.self)
         guard let obj = NSEntityDescription.insertNewObject(forEntityName: className, into: context) as? T else {return nil}
         return obj
     }

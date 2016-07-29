@@ -26,19 +26,19 @@ class Language: NSManagedObject {
     }
     
     class func fetch(_ code: String, context: NSManagedObjectContext) -> Language? {
-        let fetchRequest = NSFetchRequest(entityName: "Language")
+        let fetchRequest = NSFetchRequest<Language>(entityName: "Language")
         fetchRequest.predicate = Predicate(format: "code == %@", code)
-        return fetch(fetchRequest, type: Language.self, context: context)?.first
+        return (try? context.fetch(fetchRequest))?.first
     }
     
     class func fetch(displayed: Bool, context: NSManagedObjectContext) -> [Language] {
-        let fetchRequest = NSFetchRequest(entityName: "Language")
+        let fetchRequest = NSFetchRequest<Language>(entityName: "Language")
         fetchRequest.predicate = Predicate(format: "isDisplayed == %@ AND name != nil", displayed)
-        return fetch(fetchRequest, type: Language.self, context: context) ?? [Language]()
+        return (try? context.fetch(fetchRequest)) ?? [Language]()
     }
     
     class func fetchAll(_ context: NSManagedObjectContext) -> [Language] {
-        let fetchRequest = NSFetchRequest(entityName: "Language")
-        return fetch(fetchRequest, type: Language.self, context: context) ?? [Language]()
+        let fetchRequest = NSFetchRequest<Language>(entityName: "Language")
+        return (try? context.fetch(fetchRequest)) ?? [Language]()
     }
 }

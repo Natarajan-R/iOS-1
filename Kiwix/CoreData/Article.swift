@@ -13,9 +13,7 @@ import CoreData
 class Article: NSManagedObject {
 
     class func addOrUpdate(_ title: String? = nil, url: URL, book: Book, context: NSManagedObjectContext) -> Article? {
-        let fetchRequest = NSFetchRequest(entityName: "Article")
-        fetchRequest.predicate = Predicate(format: "urlString = %@", url.absoluteString)
-        let article = Article.fetch(fetchRequest, type: Article.self, context: context)?.first ?? insert(Article.self, context: context)
+        let article = Article.fetch(url: url, context: context) ?? insert(Article.self, context: context)
         
         article?.title = title
         article?.urlString = url.absoluteString
@@ -24,14 +22,21 @@ class Article: NSManagedObject {
         return article
     }
     
+    class func fetch(url: URL, context: NSManagedObjectContext) -> Article? {
+        guard let absoluteURL = url.absoluteURL else {return nil}
+        let fetchRequest = NSFetchRequest<Article>(entityName: "Article")
+        fetchRequest.predicate = Predicate(format: "urlString = %@", absoluteURL)
+        return (try? context.fetch(fetchRequest))?.first
+    }
+    
     class func fetchRecentBookmarks(_ count: Int, context: NSManagedObjectContext) -> [Article] {
-        let fetchRequest = NSFetchRequest(entityName: "Article")
+        let fetchRequest = NSFetchRequest<Article>(entityName: "Article")
         let dateDescriptor = SortDescriptor(key: "bookmarkDate", ascending: false)
         let titleDescriptor = SortDescriptor(key: "title", ascending: true)
         fetchRequest.sortDescriptors = [dateDescriptor, titleDescriptor]
         fetchRequest.predicate = Predicate(format: "isBookmarked == true")
         fetchRequest.fetchLimit = count
-        return fetch(fetchRequest, type: Article.self, context: context) ?? [Article]()
+        return (try? context.fetch(fetchRequest)) ?? [Article]()
     }
     
     // MARK: - Helper

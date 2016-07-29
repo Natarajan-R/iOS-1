@@ -28,7 +28,9 @@ class Book: NSManagedObject {
         book.desc = metadata["description"] as? String
         book.meta4URL = metadata["url"] as? String
         
-        if let articleCount = metadata["articleCount"] as? String, mediaCount = metadata["mediaCount"] as? String, fileSize = metadata["size"] as? String {
+        if let articleCount = metadata["articleCount"] as? String,
+            let mediaCount = metadata["mediaCount"] as? String,
+            let fileSize = metadata["size"] as? String {
             let numberFormatter = NumberFormatter()
             numberFormatter.numberStyle = NumberFormatter.Style.decimal
             book.articleCount = numberFormatter.number(from: articleCount)?.int64Value ?? 0
@@ -77,15 +79,15 @@ class Book: NSManagedObject {
     // MARK: - Fetch
     
     class func fetchAll(_ context: NSManagedObjectContext) -> [Book] {
-        let fetchRequest = NSFetchRequest(entityName: "Book")
-        return fetch(fetchRequest, type: Book.self, context: context) ?? [Book]()
+        let fetchRequest = NSFetchRequest<Book>(entityName: "Book")
+        return (try? context.fetch(fetchRequest)) ?? [Book]()
     }
     
     class func fetchLocal(_ context: NSManagedObjectContext) -> [ZimID: Book] {
-        let fetchRequest = NSFetchRequest(entityName: "Book")
+        let fetchRequest = NSFetchRequest<Book>(entityName: "Book")
         let predicate = Predicate(format: "isLocal = true")
         fetchRequest.predicate = predicate
-        let localBooks = fetch(fetchRequest, type: Book.self, context: context) ?? [Book]()
+        let localBooks = (try? context.fetch(fetchRequest)) ?? [Book]()
         
         var books = [ZimID: Book]()
         for book in localBooks {
@@ -96,9 +98,9 @@ class Book: NSManagedObject {
     }
     
     class func fetch(_ id: String, context: NSManagedObjectContext) -> Book? {
-        let fetchRequest = NSFetchRequest(entityName: "Book")
+        let fetchRequest = NSFetchRequest<Book>(entityName: "Book")
         fetchRequest.predicate = Predicate(format: "id = %@", id)
-        return fetch(fetchRequest, type: Book.self, context: context)?.first
+        return (try? context.fetch(fetchRequest))?.first
     }
     
     // MARK: - Properties Description
