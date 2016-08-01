@@ -54,10 +54,10 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
             Network.sharedInstance.download(book)
         case .caution:
             // TODO: - Switch to a global op queue
-            Network.sharedInstance.operationQueue.addOperation(SpaceCautionAlert(book: book, presentationContext: self))
+            Network.sharedInstance.queue.addOperation(SpaceCautionAlert(book: book, presentationContext: self))
         case .notEnough:
             // TODO: - Switch to a global op queue
-            Network.sharedInstance.operationQueue.addOperation(SpaceNotEnoughAlert(book: book, presentationContext: self))
+            Network.sharedInstance.queue.addOperation(SpaceNotEnoughAlert(book: book, presentationContext: self))
         }
     }
     

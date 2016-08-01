@@ -88,25 +88,25 @@ class ZimMultiReader: NSObject, DirectoryMonitorDelegate {
     
     // MARK: Search (Old)
     
-    func search(_ searchTerm: String, zimFileID: String) -> [(id: String, articleTitle: String)] {
-        var resultTuples = [(id: String, articleTitle: String)]()
-        let firstCharRange = searchTerm.startIndex...searchTerm.startIndex
-        let firstLetterCapitalisedSearchTerm = searchTerm.replacingCharacters(in: firstCharRange, with: searchTerm.substring(with: firstCharRange).capitalized)
-        let searchTermVariations = Set([searchTerm, searchTerm.uppercased(), searchTerm.lowercased(), searchTerm.capitalized, firstLetterCapitalisedSearchTerm])
-        
-        let reader = readers[zimFileID]
-        var results = Set<String>()
-        for searchTermVariation in searchTermVariations {
-            guard let result = reader?.searchSuggestionsSmart(searchTermVariation) as? [String] else {continue}
-            results.formUnion(result)
-        }
-        
-        for result in results {
-            resultTuples.append((id: zimFileID, articleTitle: result))
-        }
-        
-        return resultTuples
-    }
+//    func search(_ searchTerm: String, zimFileID: String) -> [(id: String, articleTitle: String)] {
+//        var resultTuples = [(id: String, articleTitle: String)]()
+//        let firstCharRange = searchTerm.startIndex...searchTerm.startIndex
+//        let firstLetterCapitalisedSearchTerm = searchTerm.replacingCharacters(in: firstCharRange, with: searchTerm.substring(with: firstCharRange).capitalized)
+//        let searchTermVariations = Set([searchTerm, searchTerm.uppercased(), searchTerm.lowercased(), searchTerm.capitalized, firstLetterCapitalisedSearchTerm])
+//        
+//        let reader = readers[zimFileID]
+//        var results = Set<String>()
+//        for searchTermVariation in searchTermVariations {
+//            guard let result = reader?.searchSuggestionsSmart(searchTermVariation) as? [String] else {continue}
+//            results.formUnion(result)
+//        }
+//        
+//        for result in results {
+//            resultTuples.append((id: zimFileID, articleTitle: result))
+//        }
+//        
+//        return resultTuples
+//    }
     
     // MARK: - Loading System
     

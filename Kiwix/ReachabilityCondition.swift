@@ -16,7 +16,7 @@ import Operations
     Reachability is evaluated once when the operation to which this is attached is asked about its readiness.
 */
 struct ReachabilityCondition: OperationCondition {
-    let hostKey: String
+//    let hostKey: String
     let name = "Reachability"
     let isMutuallyExclusive = false
     
@@ -26,7 +26,7 @@ struct ReachabilityCondition: OperationCondition {
     init(host: URL, allowCellular: Bool = true) {
         self.host = host
         self.allowCellular = allowCellular
-        super.init()
+//        self.init()
     }
     
     func dependencyForOperation(_ operation: Procedure) -> Operation? {

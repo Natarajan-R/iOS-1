@@ -58,7 +58,7 @@ class FileManager {
                 print("Create temp download folder failed: \(error.localizedDescription)")
             }
         }
-        try? data.write(to: resumeDataURL(book), options: [.dataWritingAtomic])
+        try? data.write(to: resumeDataURL(book), options: [.atomic])
     }
     
     class func readResumeData(_ book: Book) -> Data? {
