@@ -106,20 +106,28 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
     
     // MARK: - OperationQueueDelegate
     
-    func operationQueue(_ operationQueue: OperationQueue, willAddOperation operation: Operation) {
-        guard operationQueue.operationCount == 0 else {return}
+    func operationQueue(_ queue: ProcedureQueue, willAddOperation operation: Operation) {
+        guard queue.operationCount == 0 else {return}
         shouldReportProgress = true
         OperationQueue.main.addOperation { () -> Void in
             self.timer = Foundation.Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(Network.resetProgressReportingFlag), userInfo: nil, repeats: true)
         }
     }
     
-    func operationQueue(_ operationQueue: OperationQueue, operationDidFinish operation: Operation, withErrors errors: [NSError]) {
-        guard operationQueue.operationCount == 1 else {return}
+    func operationQueue(_ queue: ProcedureQueue, willFinishOperation operation: Operation, withErrors errors: [ErrorProtocol]) {
+        
+    }
+    
+    func operationQueue(_ queue: ProcedureQueue, didFinishOperation operation: Operation, withErrors errors: [ErrorProtocol]) {
+        guard queue.operationCount == 1 else {return}
         OperationQueue.main.addOperation { () -> Void in
             self.timer?.invalidate()
             self.shouldReportProgress = false
         }
+    }
+    
+    func operationQueue(_ queue: ProcedureQueue, willProduceOperation operation: Operation) {
+        
     }
     
     // MARK: - NSURLSessionDelegate
@@ -132,7 +140,7 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
             notification.alertTitle = NSLocalizedString("Book download finished", comment: "Notification: Book download finished")
             notification.alertBody = NSLocalizedString("All download tasks are finished.", comment: "Notification: Book download finished")
             notification.soundName = UILocalNotificationDefaultSoundName
-            UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+            UIApplication.shared().presentLocalNotificationNow(notification)
         }
     }
     
