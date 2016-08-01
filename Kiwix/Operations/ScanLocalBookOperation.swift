@@ -112,9 +112,8 @@ class ScanLocalBookOperation: Procedure {
     // MARK: - Helper
     
     private class func getCurrentZimFileURLsInDocDir() -> Set<URL> {
-        FileManager.
-        let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [URL]()
         var zimURLs = Set<URL>()
+        guard let fileURLs = try? FileManager.default.contentsOfDirectory(atPath: FileManager.docDirPath) else {return zimURLs}
         for url in fileURLs {
             let keys = Set(arrayLiteral: URLResourceKey.isDirectoryKey)
             guard let values = try? url.resourceValues(forKeys: keys),

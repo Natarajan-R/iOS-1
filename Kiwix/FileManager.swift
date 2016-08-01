@@ -6,7 +6,7 @@
 //  Copyright © 2016 Chris. All rights reserved.
 //
 
-class FileManager {
+class KFileManager {
     
     // MARK: - Path Utilities
     

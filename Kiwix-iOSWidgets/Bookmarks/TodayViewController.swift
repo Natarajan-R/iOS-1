@@ -79,7 +79,7 @@ class TodayViewController: UIViewController, NCWidgetProviding, UICollectionView
     // MARK: - NCWidgetProviding
     
     func widgetMarginInsets(forProposedMarginInsets defaultMarginInsets: UIEdgeInsets) -> UIEdgeInsets {
-        return UIEdgeInsetsZero
+        return UIEdgeInsets.zero
     }
     
     func widgetPerformUpdate(completionHandler: ((NCUpdateResult) -> Void)) {

@@ -83,3 +83,14 @@ extension UIAlertController {
         for action in actions {addAction(action)}
     }
 }
+
+// MARK: - FileManager
+extension FileManager {
+    class var docDirURL: URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+    
+    class var docDirPath: String {
+        return FileManager.docDirURL.path
+    }
+}
