@@ -315,13 +315,13 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: "language.name", cacheName: "OnlineFRC")
         fetchedResultsController.delegate = self
-        fetchedResultsController.performFetch(deleteCache: false)
+        _ = try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
     
     func refreshFetchedResultController() {
         fetchedResultController.fetchRequest.predicate = onlineCompoundPredicate
-        fetchedResultController.performFetch(deleteCache: true)
+        _ = try? fetchedResultController.performFetch()
         tableView.reloadData()
         configureMessage()
     }

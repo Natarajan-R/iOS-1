@@ -254,7 +254,7 @@ class LibraryDownloadTBVC: UITableViewController, NSFetchedResultsControllerDele
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: nil, cacheName: "DownloadFRC")
         fetchedResultsController.delegate = self
-        fetchedResultsController.performFetch(deleteCache: false)
+        _ = try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
     

@@ -214,7 +214,7 @@ class LibraryLocalTBVC: UITableViewController, NSFetchedResultsControllerDelegat
         fetchRequest.predicate = Predicate(format: "isLocal == true")
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: "language.name", cacheName: "LocalFRC")
         fetchedResultsController.delegate = self
-        fetchedResultsController.performFetch(deleteCache: false)
+        _ = try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
     

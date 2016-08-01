@@ -148,7 +148,7 @@ class BookmarkTBVC: UITableViewController, NSFetchedResultsControllerDelegate, D
         fetchRequest.predicate = Predicate(format: "isBookmarked == true")
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: nil, cacheName: "BookmarksFRC" + Bundle.appShortVersion)
         fetchedResultsController.delegate = self
-        fetchedResultsController.performFetch(deleteCache: false)
+        _ = try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
 

@@ -79,7 +79,7 @@ class SearchBooksVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         fetchRequest.predicate = Predicate(format: "isLocal == true")
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext, sectionNameKeyPath: "language.name", cacheName: "ScopeFRC")
         fetchedResultsController.delegate = self
-        fetchedResultsController.performFetch(deleteCache: false)
+        _ = try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
     
