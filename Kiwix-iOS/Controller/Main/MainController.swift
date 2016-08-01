@@ -123,8 +123,8 @@ class MainController: UIViewController {
     }
     
     func loadMainPage(_ id: ZimID) {
-        guard let reader = ZimMultiReader.sharedInstance.readers[id] else {return}
-        let mainPageURLString = reader.mainPageURL()
+        guard let reader = ZimMultiReader.sharedInstance.readers[id],
+            let mainPageURLString = reader.mainPageURL() else {return}
         let mainPageURL = URL.kiwixURLWithZimFileid(id, contentURLString: mainPageURLString)
         load(mainPageURL)
     }

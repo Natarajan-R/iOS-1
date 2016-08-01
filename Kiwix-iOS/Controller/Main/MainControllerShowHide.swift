@@ -51,14 +51,15 @@ extension MainController {
     }
     
     private func showSearchResultController(animated: Bool) {
-        guard let searchController = searchController ?? UIStoryboard.search.instantiateInitialViewController() as? SearchController else {return}
+        guard let searchController = searchController ?? UIStoryboard.search.instantiateInitialViewController() as? SearchController,
+            let searchControllerView = searchController.view else {return}
         self.searchController = searchController
         guard !childViewControllers.contains(searchController) else {return}
         addChildViewController(searchController)
         searchController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchController.view)
         
-        let views = ["SearchController": searchController.view]
+        let views = ["SearchController": searchControllerView]
         view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[SearchController]|", options: .alignAllCenterY, metrics: nil, views: views))
         view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[SearchController]|", options: .alignAllCenterX, metrics: nil, views: views))
         
