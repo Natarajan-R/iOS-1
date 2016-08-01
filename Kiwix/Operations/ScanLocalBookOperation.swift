@@ -112,22 +112,17 @@ class ScanLocalBookOperation: Procedure {
     // MARK: - Helper
     
     private class func getCurrentZimFileURLsInDocDir() -> Set<URL> {
+        FileManager.
         let fileURLs = FileManager.contentsOfDirectory(FileManager.docDirURL) ?? [URL]()
         var zimURLs = Set<URL>()
         for url in fileURLs {
-            do {
-                var isDirectory: AnyObject? = nil
-                try (url as NSURL).getResourceValue(&isDirectory, forKey: URLResourceKey.isDirectoryKey)
-                if let isDirectory = (isDirectory as? NSNumber)?.boolValue {
-                    if !isDirectory {
-                        guard let pathExtension = url.pathExtension?.lowercased() else {continue}
-                        guard pathExtension.contains("zim") else {continue}
-                        zimURLs.insert(url)
-                    }
-                }
-            } catch {
-                continue
-            }
+            let keys = Set(arrayLiteral: URLResourceKey.isDirectoryKey)
+            guard let values = try? url.resourceValues(forKeys: keys),
+                let isDirectory = values.isDirectory,
+                isDirectory == false else {continue}
+            guard let pathExtension = url.pathExtension?.lowercased(),
+                pathExtension.contains("zim") else {continue}
+            zimURLs.insert(url)
         }
         return zimURLs
     }

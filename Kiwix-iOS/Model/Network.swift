@@ -77,13 +77,13 @@ class Network: NSObject, URLSessionDelegate, URLSessionDownloadDelegate, URLSess
     
     func pause(_ book: Book) {
         guard let id = book.id,
-            let operation = queue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
+            let operation = queue.getProcedure(name: id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: true)
     }
     
     func cancel(_ book: Book) {
         guard let id = book.id,
-            let operation = queue.getOperation(id) as? URLSessionDownloadTaskOperation else {return}
+            let operation = queue.getProcedure(name: id) as? URLSessionDownloadTaskOperation else {return}
         operation.cancel(produceResumeData: false)
     }
     

@@ -26,13 +26,12 @@ public enum OperationErrorCode: Int {
     case unexpectedError
 }
 
-extension OperationQueue {
-    // Oneday should be replaced with ExclusivityController
-    func getOperation(_ id: String) -> Operation? {
+extension ProcedureQueue {
+    func getProcedure(name: String) -> Procedure? {
         for operation in operations {
-            guard operation.name == id else {continue}
-            guard let operation = operation as? Operation else {continue}
-            return operation
+            guard operation.name == name else {continue}
+            guard let procedure = operation as? Procedure else {continue}
+            return procedure
         }
         return nil
     }

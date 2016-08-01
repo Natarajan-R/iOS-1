@@ -43,7 +43,6 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
         messsageLabelRefreshTimer?.invalidate()
     }
     
-    
     // MARK: - TableCellDelegate
     
     func didTapOnAccessoryViewForCell(_ cell: UITableViewCell) {
@@ -242,8 +241,8 @@ class LibraryOnlineTBVC: UITableViewController, NSFetchedResultsControllerDelega
     }
     
     func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
-        guard let book = fetchedResultController.object(at: indexPath) as? Book else {return}
         guard let cell = cell as? CloudBookCell else {return}
+        let book = fetchedResultController.object(at: indexPath)
         
         cell.titleLabel.text = book.title
         cell.hasPicIndicator.backgroundColor = book.hasPic ? UIColor.havePicTintColor : UIColor.lightGray()
