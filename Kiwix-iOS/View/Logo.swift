@@ -82,7 +82,11 @@ class Logo: UIView {
         
         
         //// sclera Drawing
-        let scleraPath = UIBezierPath(ovalIn: CGRect(x: bird.minX + floor(bird.width * 0.59068 - 0.06) + 0.56, y: bird.minY + floor(bird.height * 0.20662 + 0.46) + 0.04, width: floor(bird.width * 0.69186 + 0.34) - floor(bird.width * 0.59068 - 0.06) - 0.4, height: floor(bird.height * 0.34139 - 0.44) - floor(bird.height * 0.20662 + 0.46) + 0.9))
+        let x: CGFloat = bird.minX + floor(bird.width * 0.59068 - 0.06) + 0.56
+        let y: CGFloat = bird.minY + floor(bird.height * 0.20662 + 0.46) + 0.04
+        let w: CGFloat = floor(bird.width * 0.69186 + 0.34) - floor(bird.width * 0.59068 - 0.06) - 0.4
+        let h: CGFloat = floor(bird.height * 0.34139 - 0.44) - floor(bird.height * 0.20662 + 0.46) + 0.9
+        let scleraPath = UIBezierPath(ovalIn: CGRect(x: x, y: y, width: w, height: h))
         fillColor2.setFill()
         scleraPath.fill()
         
